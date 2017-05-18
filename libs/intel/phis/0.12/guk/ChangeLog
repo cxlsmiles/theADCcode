@@ -1,0 +1,346 @@
+2004-04-02  Alex Thiel  <stderr@web.de>
+
+	Part of patch 0.8.1
+	* test/test.pl: Call dump_out in symmetry-first and energy-first
+	mode to check that all parts of PHIS can be executed.
+
+2004-03-31  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.7.103
+	This patch implements the dipol integrals for the GUK backend.
+
+	* guk_read_type2.c: New file, replaces guk5_read_type2.c.
+	This file hides the implementational differences between GUK
+	versions 5 and 6 w.r.t. section type 2.
+	* phis_guk_dip.c: New file. Reads the dipole moments and
+	transforms them to the MO basis.
+	* phis_guk_overlap.c: Now uses guk_read_type2(), too.
+	* phis_guk_geometry.c: Use guk_read_type2() to extract the nuclear
+	potential energy.
+	* phis_guk_epsi.c: Likewise.
+	* guk_init.c: Added phis_guk_dip() to the interface and announced
+	it in the capabilities.
+	(query_guk_version): New local function. Version detection now works 
+	on all (known) architectures.
+	(Guk_version_5): Removed. Use generic functions instead.
+	* guk_aux.c (copy_and_expand): New function to expand a packed matrix
+	out-of-place. Used for the one-electron matrices.
+	* Makefile.in (guk5_read_type.o): Changed to guk_read_type2.o
+	(phis_guk_dip.o): New entry.
+	* guk.h: Protoypes added for the new fuctions.
+	(enum type2): Enumerates the properties in section 2.
+	(PotNuc): Removed.
+	(Guk_version_5): Removed.
+	
+	
+2004-03-26  Alexander Thiel  <stderr@web.de>
+
+	Part of patch 0.7.102
+	Script cleanup.
+
+	* test/test.pl: Removed some assumptions about the execution
+	environment. The path to the GUK executable may now be given as an
+	optional argument.
+	Now actually compares the results and exits on failure.
+	* Makefile.in: New target test, executes test/test.pl.
+	Removed configure stuff from the realclean and distclean.
+	
+2004-03-22  Alexander Thiel  <stderr@web.de>
+
+	Part of patch 0.7.100
+	Streamline configuration.
+	* configure.ac: Removed.
+	
+2004-03-19  Alexander Thiel  <stderr@web.de>
+
+	* guk_init.c: Fixed some bugs introduced with the latest
+	patch. Also removes a chunk of unused code.
+
+2004-03-11  Alexander Thiel  <stderr@web.de>
+
+	This patch adds symmetry-first ordering. Detailed changes:
+	* guk_init.c: Added code to reorder the active orbitals
+	symmetry-first and concatenated this with the active->SCF mapping.
+	This also required some reorganization of the code since I need to
+	call phis_guk_sym().
+	Added a few more flags to the announced capabilities in the
+	SYM_BLOCKED case.
+
+2004-03-10  Alexander Thiel  <stderr@web.de>
+
+	This patch removes the functionality to display inactive
+	orbitals. Detailed changes:
+	* guk.h: Remove global variables unit_map and active_only.
+	(map_to_act): Renamed to more appropriate map_active (since it
+	maps _from_ active orbitals).
+	* guk_init.c: Removed initialization of these variables.
+	* phis_guk_info.c: Reference to active_only removed.
+	* phis_guk_epsi.c: Basically reverted change from 2002-04-10.
+	* phis_guk_occ.c: Likewise.
+	* phis_guk_sym.c: Likewise.
+	* phis_guk_scfvec.c: Likewise.
+	* phis_guk_loa.c (map_to_act): Renamed to map_active.
+
+2004-03-03  Joerg Breidbach  <joergb@tc.pci.uni-heidelberg.de>
+
+	* phis_guk_ao.c: "HARMONIC ON" in GUK leads to different number of
+	scf-vectors and basisfunctions; now uses the correct number of
+	basis functions if using "HARMONIC ON"
+	* phis_guk_overlap.c: likewise
+	* phis_guk_scfvec.c: likewise
+
+2004-03-02  Joerg Breidbach  <joergb@tc.pci.uni-heidelberg.de>
+
+	* tools/dump_section.c: bugfix
+	* typeinits.c: corrected bug in typedef of section 3
+	* phis_guk_sym.c: now takes the AO-symlabels only if MO-syms not
+	in dfile
+	* guk_init.c: corrected bug in check for old GUK version, but
+	still not working on the DECs (float exception) 
+
+2003-06-26  Alexander Thiel  <stderr@web.de>
+
+	* guk.h: Added missing prototypes for sort_gukscf() and guk5_read_type2().
+	* phis_guk_geometry.c: Include "phis.h". Return negative value on error.
+	* phis_guk_overlap.c: Include string.h for memcpy().
+	* phis_guk_scfvec.h: Likewise.
+
+2003-06-04  Joerg Breidbach  <joergb@tc.pci.uni-heidelberg.de>
+
+	* phis_guk_geometry.c (phis_guk_geometry): phis_guk_geometry now
+	returns the (sometimes needed) nuclear charges
+	* guk.h: Likewise
+	* guk_init.c: Likewise
+
+2003-04-24  Joerg Breidbach  <joergb@schlappi>
+
+	* guk_aux.c (guk_getpara): New function, determines GUK parameters 
+	from actual dfile
+	(guk_sizeof_subsection): New function, likewise
+	* configure.ac: Likewise (getpara.pl call removed)
+	* guk.h: Likewise
+	* guk_init.c: Likewise
+	* phis_guk_ao.c: Likewise
+	* phis_guk_geometry.c: Likewise
+	* typeinits.c: New file, initializes the GUK typdefs using the 
+	determined GUK parameters
+	* tapedefs.h: Likewise
+	* Makefile.in: Likewise
+
+	* guk_init.c: now detects dfile generated with GUK5 (needed for
+	information in section type 2
+	* guk5_read_type2.c: New file, reads several matrices in section
+	type 2 from GUK5 dfiles: S,T,H,x,y,z
+	* phis_guk_overlap.c: Likewise
+
+2003-04-15  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* phis_guk_sym.c: Determine the MO symmetry from the AOs.
+
+2003-02-07  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis_guk_geometry.c: This one had CRLF style line breaks. 
+	Unixified.
+
+2003-02-04  Alexander Thiel  <stderr@web.de>
+
+	* phis_guk_sym.c: 'bypass hf' in GUK overwrites symmetry labels,
+	catch this.
+
+2003-02-02  Alexander Thiel  <stderr@web.de>
+
+	* configure.ac: Configure path to Perl executable.
+
+2002-12-02  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* guk_init.c (guk_init_hook): Returned capabilities now depend
+	on the value of the SYM_BLOCKED flag.
+
+2002-11-15  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+ 	* guk.h (phis_guk_geometry): New function.
+ 	(nAtoms): New global variable.
+ 	* guk_init.c: Determines nAtoms.
+ 	* phis_guk_info.c: Likewise.
+ 	* phis_guk_geometry.c: New file. 
+ 	* Makefile.in: Likewise.
+	* phis_guk_overlap.c: Error return changed: -nBas*nBas -> -nBas 
+
+ 	* phis_guk_ao.c: fixed another bug considering 
+ 	f-functions in lists "l_tab" and "f_tab".
+ 	* sort_gukscf.c: bug in sorting with n>1 fixed.
+ 	
+2002-09-16  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* configure.ac (CFLAGS): If debugging is requested and we use gcc, 
+	do not use -O2 and add -Wall.
+
+2002-06-07  Alexander Thiel  <stderr@web.de>
+
+	* test/test.*, test/README: Some test added.
+
+2002-04-30  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* guk_init.c: Changed macro ACTIVE_ONLY to SHOW_INACTIVE.
+
+2002-04-21  Alexander Thiel  <stderr@web.de>
+
+	* configure.ac (--enable-debug): -DDEBUG and -lefence added.
+	
+2002-04-12  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis_guk_loa.c: Orbital indices off by one, fixed.
+	(active_only): Variable moved...
+	* guk_init.c: ...here. Now accepts flags parameter and sets 
+	active_only.
+
+2002-04-10  Alexander Thiel  <stderr@web.de>
+
+	* phis_guk_loa.c: New file.
+	(active_only): Global flag.
+	* guk.h (phis_guk_loa): Added.
+	* Makefile.in: Likewise.
+	* guk_init.c: Now uses malloc_we(). 
+	(nBas): Global variable - total number of basis functions.
+	(unit_map): Global array, to be used instead of list_of_active 
+	if active_only = FALSE.
+	* phis_guk_info.c: Changed nBas to nFunc to avoid conflict with
+	new global var.
+	Support for active_only added.
+	* phis_guk_epsi.c: Likewise.
+	* phis_guk_occ.c: Likewise.
+	* phis_guk_sym.c: Likewise.
+	* phis_guk_scfvec.c: Likewise.
+	
+2002-04-04  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* sort_gukscf.c: now transformations with n>2 and |c|!=1 should
+	work
+	* phis_guk_scfvec.c: Hardcoded length removed.
+	Now first reads (dump-)section of Type_3, then the SCF-vectors.
+	Return nmb_act and nmb_bas on error (not number of matrixelements)
+	* guk_aux.c (guk_get_section): Hardcoded length of section type 3 
+	removed. Now reads as many blocks as needed for 'sizeof(Type_x)'
+	* configure.ac (--with-guk): '==' changed to '=' for DECs
+
+2002-03-25  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* guk_init.c: Improved diagnostics.
+	* phis_guk_ao.c: Return required value for nmb_ao *and* max_nmb_cc
+	on error.
+
+2002-03-24  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* guk_aux.c (guk_get_section): Hardcoded length of section type 3,
+	needs to be fixed.
+	* phis_guk_info.c: Now returns the correct number of atoms.
+	
+	* sort_gukscf.c: New file.
+	* Makefile.in: New files added.
+	* phis_get_scfvec.c: Call sort_gukscf() to fix AO ordering in SCF
+	vectors.
+	
+2002-03-24  Alexander Thiel  <stderr@web.de>
+
+	* tools: New directory.
+	* tools/dump_section.c: New file.
+
+	* test: New directory
+	* test/h2o.in: New file.
+
+	* typedefs.h: section type 1005 added; contains core/active lists.
+	
+	* guk.h (Summary): Changed from pointer to static structure, this
+	has constant size and is needed all the time. All references
+	changed accordingly.
+	(nAct, map_to_act): new variables to handle frozen and deleted
+	orbitals.
+
+	* guk_aux.c (guk_get_section): simplyfied by pulling the malloc
+	out of the switch statements.
+	(guk_get_block): Fixed inconsistent treatement of blkno.
+	(guk_lookup_sec): I was always tempted to think that this returns
+	the position of a given section, so I renamed it to...
+	(guk_sec_by_type): ...this. Changed all references accordingly.
+
+	* guk_init.c: Generate a map of active orbitals from information
+	in section type 1005.
+	* phis_guk_info.c: Return active orbitals only.
+	* phis_guk_epsi.c: Likewise.
+	* phis_guk_occ.c: Likewise.
+	* phis_guk_sym.c: Likewise.
+
+	* phis_guk_scfvec.c: Return SCF vectors for active orbitals
+	only. Changed API to return number of SCF vectors and their length
+	(which may be different).
+	
+2002-03-14  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis_guk_nextint.c: Check if ed6 is set.
+
+	* configure.ac: Set default for GUK executable to guk;
+	error checking added.
+
+2002-03-14  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* phis_guk_ao.c: new file added.
+	* guk_init.c (guk_init_hook): hook added.
+	* guk.h: Changed according to latest changes in the specs.
+	* Makefile.in: Likewise.
+
+	* phis_guk_overlap.c: Return value fixed.
+	* getpara.pl: Quick fix for mxshel.
+
+2002-03-12  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* guk_init.c (guk_init_hook): Removed initialization of 2e integrals.
+	* guk.h: Changed according to latest changes in the specs.
+	* phis_guk_epsi.c: Likewise.
+	* phis_guk_occ.c: Likewise.
+	* phis_guk_sym.c: Likewise.
+	* phis_guk_scfvec.c: Likewise. Working if no orbitals are frozen, and
+	GUK version 6 is used.
+	* phis_guk_overlap.c: Likewise.
+	
+	* guk_aux.c: include string.h for memcpy.
+
+	* Makefile.in (CFLAGS): Hardwired -I../include
+	(realcleanfiles): Replaced guk.h with config.h
+	(distcleanfiles): Replaced guk.h.in with config.h.in 
+
+	* guk_init.c: Fixed some problems with external vars. Cleaned up code 
+	for PotNuc.
+	
+	* guk.h: Forgot to put external qualifier on some vars.
+	Moved the typedefs.
+	* phis_guk_nextint.c: Moved typedefs.
+	* typedefs.h: New file., collects all the dumpfile structures.
+
+	* configure.ac: Made this more DEC friendly.
+	* getpara.pl: Likewise.
+
+2002-03-01  Alexander Thiel  <stderr@web.de>
+
+	* phis_guk_scfvec.c: New file, not yet tested.
+	* phis_guk_overlap.c: Likewise.
+	* guk_init.c (guk_init_hook): New functions hooked into interface, 
+	error checking for unset env variables.
+	(dumpfile_name): Made global.
+	Changed according to latest changes in specs.
+
+	* phis_guk_epsi.c: Changed according to spec.
+	* guk.h: Likewise.
+
+2002-02-11  Alexander Thiel  <stderr@web.de>
+
+	* Makefile.in: Imported.
+	* configure.ac: Likewise.
+	* getpara.pl: Likewise.
+	* guk.h: Likewise.
+	* guk_aux.c: Likewise.
+	* guk_init.c: Added.
+	* phis_guk_epsi.c: Likewise.
+	* phis_guk_info.c: Likewise.
+	* phis_guk_nextint.c: Likewise.
+	* phis_guk_occ.c: Likewise.
+	* phis_guk_sym.c: Likewise.

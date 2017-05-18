@@ -1,0 +1,11 @@
+syntax: glob
+*.o
+*~
+*.oo
+*.ipa
+*.mod
+theADCcode
+*.orig
+
+syntax: regexp
+.*\#.*\#$

@@ -1,0 +1,350 @@
+This is merely a collection of notes right now. The specifications are
+subject to radical changes as the project evolves.
+
+#----------------------------------------------------------------------#
+
+Terms used:
+Here is really need to clarify the concept.
+front-end, back-end, what more?
+
+#----------------------------------------------------------------------#
+
+The back-end needs to provide:
+
+* a unique ID
+* an initialization hook 
+
+The init hook must
+
+* fill in the entry points in the interface structure
+* set the capabilities correspondingly
+* do whatever is necessary to ensure proper function of the back-end
+* return the capabilities or zero on error.
+
+See separate section for the specification of the capabilities.
+
+#----------------------------------------------------------------------#
+
+A note on name space: 
+You should make sure that the names of your routines are unique, especially
+when coding in FORTRAN.
+
+Maybe you could include the ID in the routine names (not very elegant...)
+
+#----------------------------------------------------------------------#
+
+Requirements for numbering irreducible representations:
+For the sake of definiteness, we require the irreducible representations
+to be numbered in a fixed way. If a given ab initio package uses a 
+different scheme, it is the back-end's responsibility to remap the numbers
+before passing them to the caller.
+
+          1    2    3    4    5    6    7    8
+        ---------------------------------------
+  Cs     a'   a"
+  Ci     ag   au
+  C2      a    b
+  D2      a   b1   b2   b3
+  C2v    a1   a2   b1   b2
+  C2h    ag   bg   au   bu
+  D2h    ag  b1g  b2g  b3g   au  b1u  b2u  b3u
+
+#----------------------------------------------------------------------#
+
+Specification of the functionality:
+
+FIXME: This *is* a mess and should be rewritten completely. No wonder no one
+       ever reads this.
+
+Note: it may be nice to have things blocked by symmetry. So maybe we should
+have an extra parameter to the init function to request symmetry blocking?
+The init function could return false, if this is not supported.
+
+NOTE: Integers are assumed to be 4 bytes, doubles are 8 bytes.
+
+0/ int phis_init (int *iVersion, int *arg, char *path)
+This routine must be called to initialize the library.
+On entry: 
+          i) 
+
+           (a) iVersion:  is equal to 1 or to 2. If iVersion=1, then you do 
+          not plan to use PHIS in multiloading regime, i.e. it means that 
+          you want to proceed only one project. In this case PHIS works in 
+          current directory (be sure that all files are present in this 
+          directory). For this kind of initialization path should be equal to 
+          NULL. Below is listing of source code  for this kind of initialization:
+          #------------------------------------#
+          ...
+          int  iVersion=1;
+          char path[]=NULL;
+          ...
+
+          phis_init(&iVersion,&backend,&path);
+          #------------------------------------#
+
+           (b) iVersion is equal to 2. In this case you should specify the path
+          parameter, because PHIS is changing directory from current to the path. 
+         
+
+	  ii) arg: The number in the lower two bytes requests the back-end to be used. 
+          Supported back-ends are: 0 - MOLCAS, 1 - GUK
+	  The higher two bytes are used for flags to change the overall behavior of the 
+          library. Bit 16: this functionality has been removed. A warning will be 
+          displayed if this is set and the program terminates. If bit 17 is set, orbital 
+          energies and all other arrays associated with them are symmetry blocked. I.e., 
+          these are sorted by irreducible  representation first, and by orbital energy 
+          within each block. If this bit is clear, orbitals are ordered energy first.
+
+On exit:  Returns an integer that has bits set according to the functionality
+          the back-end supports. See include/phis.h for the meaning of the flags.
+
+
+1/ phis_get_info (int *nSym, int *nBas, int *nCenters)
+This function returns some general information.
+On entry: 
+On exit: nSym contains the number of irreps 
+         nBas contains the number of MO basis functions
+         nCenters contains the number of centers in the molecule.
+NOTE that all centers are counted, not only symmetry unique ones.
+
+
+2/ phis_get_epsi (double *E_hf, double *e, int *n)
+This function returns the orbital energies.
+On entry: *e must point to a data area where the orbital energies should
+          be stored.
+          *n must be set to the maximum number of doubles that can be 
+          stored in *e
+On exit: *E_hf is set to the total electronic HF energy
+         *e is initialized to the orbital energies.
+         *n is set to the actual number of entries read.
+On error: The routine must return a negative value in n. The absolute value
+          of n is set to the minimum size of e required.
+
+
+3/ phis_get_sym (int *s, int *n)
+This function returns information on orbital symmetries.
+On entry: *s must point to a data area where the symmetry labels should 
+          be stored.
+	  *n must be set to the maximum number of integers that can be stored
+          in s.
+On exit: *s contains the symmetry labels as integers.
+         *n is set to the actual number of entries read.
+On error: The routine must return a negative value of in n.
+
+
+4/ phis_get_occ (double *o, int *n)
+This function returns the orbital occupation numbers. The occupation
+numbers must be returned as floating point values to allow for fractional
+occupation in open-shell systems.
+On entry: *o must point to a data area where the occupation numbers should
+          be stored.
+          *n must be set to the maximum number of doubles that can be stored 
+          in o.
+On exit: *o is initialized to the orbital occupation numbers. 
+         *n is set to the actual number of elements read.
+On error: The routine must return a negative value in n.
+
+
+5/ void phis_get_next_Vpqrs (int *p, int *q, int *r, int *s, double *vint);
+This function returns the next two-electron integral (pq|rs), along with 
+the corresponding indices p,q,r,s. The actual order of the integral is 
+implementation dependent.
+This is useful if you use integral-driven algorithms for very large systems.
+On entry: --
+On exit: p,q,r,s contain the indices in (11|22) notation, vint contains (pq|rs)
+         If there are no more integrals left, s will have a value of 0. The 
+         value of the other variables is implementation dependent. The next 
+         call to nextvint must then return the first integral in the sequence.
+NOTE that the order of the integrals may change from pass to pass. The 
+routine may for example return the integrals in reverse order every second
+pass or in any other convenient order.
+
+
+6/ phis_get_scfvec (double *C, int *n, int *len)
+This function returns the SCF vectors as a continuous array. The SCF vectors
+are returned in terms of atomic orbitals which in turn are not symmetry
+adapted.
+On entry: *C must point to a data area to receive the SCF vectors
+	  *n must be set to the maximum number of active orbitals expected
+	  *len must be greater than the length of the vectors
+On exit: *C contains the SCF vectors, one after another. 
+         *n is set to the actual number of SCF vectors.
+	 *len is set to their length
+         I.e. C[0] to C[len] is the SCF vector of orbital 1, 
+	      C[len+1] to C[2*len] that of orbital 2, etc.
+On error: The routine must return a negative value in n.
+
+
+7/ phis_get_overlap (double *S, int *n)
+This function returns the overlap matrix of the SCF vectors, in full storage
+mode. It is ordered in the same way as C, so you are guaranteed that 
+Transpose(C).S.C = 1
+On entry: *S must point to a data area where the overlap matrix should be stored.
+          *n must be set to the maximum expected dimension of S, i.e. *S should be
+          large enough to hold n*n doubles. 
+On exit: *S contains the overlap matrix
+         *n is set to the actual dimension of this matrix.
+On error: the routine must return a negative value in n.
+
+
+8/ phis_get_geometry (int *n, double *geometry, double *Z_nuc, double *E_nuc)
+This function returns the nuclear configuration in a yet to be defined way.
+
+
+9/ phis_list_active (int *list, int *n)
+This function returns a list of active orbitals in terms of the original
+SCF molecular orbitals. For example, list[2] = 5 tells you that the second
+active orbital corresponds to MO no. 5; obviously orbitals have been frozen
+and/or reordered in this case.
+
+10/ phis_get_dip (double *x, double *y, double *z, int *n)
+Returns the components of the dipole matrix (length form) in much the same 
+way as the overlap integrals are returned.
+
+11/ phis_get_vel (double *x, double *y, double *z, int *n)
+Returns the components of the dipole matrix (velocity form) just like
+phis_get_dip() above.
+
+12/ void phis_get_quad(double *xx, double *xy, double *xz,
+                       double *yy, double *yz, double *zz, int *n)
+Returns the components of the quadrupole moment.
+
+13/ void phis_get_oneel(double *h, double *t, int *n)
+Returns the square one-electron matrices in a form similar to the overlap
+integrals above. The one-electron Hamiltonian is returned in the storage
+area indicated by the first argument. The kinetic integrals are stored in
+the area passed as the second argument.
+
+14/ int num_projects(void);  
+Returns number of PHIS's variables from environmet according to the order
+PHIS1;PHIS2;PHIS3 and so on.  These variables should be set before  
+using PHIS  in multiloading regime. For example :
+if you are using bash:
+#----------------------------------#
+#!/bin/bash
+export PHIS1=path_to_the_project_1
+export PHIS2=path_to_the_project_2
+export PHIS3=path_to_the_project_3
+...
+user_program < input_parameters
+...
+----------------------------------
+
+or if you are using csh:
+ 
+#---------------------------------#
+setenv PHIS1=path_to_the_project_1
+setenv PHIS2=path_to_the_project_2
+setenv PHIS3=path_to_the_project_3
+...
+user_program < input_parameters
+...
+#---------------------------------#
+
+in your own user_program you can use next pseudocode for counting the number projects:
+
+#---------------------#
+counter=num_projects()
+#---------------------#
+
+15/ void list_projects(int *nump,char *list);
+Returns array os strings, which contains all paths according to PHIS? variables:
+#------------------------------------------#
+...
+list[0][]<-PHIS1;
+list[1][]<-PHIS2;
+list[2][]<-PHIS3;
+#------------------------------------------#
+...
+   ^         ^
+   |         | 
+  your     
+programm  environment
+
+where list[num_projects()][MAXLENGTH=4096]
+and so on. Below is pseudocode for multiloading:
+#-------------------------------------------#
+   int iVersion=2;
+
+   counter=num_projects()
+   for (i=0;i<=counter;i++) {
+   ...
+   phis_init(&iVersion,&backend,&list[i-1]);
+   ...
+   }
+#-------------------------------------------#
+16/ void phis_mc_nextint_close(void)
+This function close TRAINT file. It can be used for multi-passing work with 
+this file. For example at first pass you find out exact number of integrals 
+which are you need (i.e., according to your threshold, kind of integral). At
+second pass you can exctract and stroe these integrals in memory. 
+#----------------------------------------------------------------------#
+Utility functions
+
+a/ void phis_load_Vpqrs(void);
+This routine must be called before you can use Vpqrs() below. It instructs
+PHIS to load the entire set of 2-electron integrals into memory and to
+initialize the lookup tables for the 2e-integrals.
+
+b/ double Vpqrs (const int *p, const int *q, const int *r, const int *s);
+This function returns the two-electron integral (pq|rs), i.e. we use the
+chemist's, or (11|22), notation. In addition, we use spin-free orbitals.
+NOTE: It is an error to request a two-electron integral that is not 
+      totally symmetric. In this case, the result is undefined.
+On entry: *p, *q, *r, *s must contain the orbital indices.
+On exit: The function returns the integral (pq|rs). It must *not* alter
+         p,q,r,s in any way.
+
+c/ void phis_version(int *major, int *minor, int *patch)
+Returns the version number of the currently linked library. This way you can detect
+incompatible changes in the library and signal the user.
+
+d/ double Vordered (const int *p, const int *q, const int *r, const int *s);
+Just like Vpqrs() above, but assumes that the indices are in canonical 
+order on input and thus skips the overhead due to reordering the indices.
+Canonical order means p>=q, r>=s and [pq] >= [rs], where [pq] is the canonical
+index defined as [pq] = (p-1)*p/2 + q.
+On entry: *p, *q, *r, *s must contain the orbital indices in canonical order.
+On exit: The function returns the integral (pq|rs). It must *not* alter
+         p,q,r,s in any way.
+
+#----------------------------------------------------------------------#
+
+A note on the concept: you may wonder why we go through all the trouble of 
+creating pointers to functions that return pointers to data in turn,
+instead of just using pointers to data in the first place. I.e., why 
+can't you do
+
+struct phis {
+    double *epsi;
+} 
+
+main()
+{
+    init();         /* would fill epsi above */
+    phis.epsi[5]    /* should then be an orbital energy */
+}
+
+instead of
+
+struct interface {
+    void (*epsi)(double *e);
+}
+
+main()
+{
+    double *e;
+    ...
+
+    init();             /* provides a pointer to a function */
+    interface.epsi(e);  /* this fills e */
+    e[5]                /* now this is an orbital energy */
+
+}
+
+The answer is that you cannot use the data in that way in FORTRAN.
+the equivalence to structures in C is common blocks in FORTRAN. However, 
+common blocks always contain immediate data, not pointers; their size is 
+determined at compile time.
+So what we could do is fix a maximum size of all the arrays in the interface, 
+which would be an incredible waste of flexibility and resources!

@@ -1,0 +1,6 @@
+2003-06-24  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis_stub_init.c: New file.
+	* Makefiel.in: Likewise.
+
+

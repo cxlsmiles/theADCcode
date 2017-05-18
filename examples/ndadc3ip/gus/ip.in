@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+###########################################################################
+#
+# RUN GAMESS-US
+  mol=n2
+
+  nameSCF=data.for.SCF
+
+  cat ${mol}.SCF.interface  $nameSCF > ${mol}.SCF.inp
+
+  rm -rf /home/yasen/scr/*
+
+  runrhf ${mol}.SCF ${mol}.SCF.out
+  wait
+  cat ${mol}.SCF.out
+  rm -fr  ${mol}.SCF.inp ${mol}.SCF.out
+
+
+#
+#
+#############################################################################
+#
+# ADC IP calculation
+
+$PWD/../../../theADCcode << EOF
+&frontend
+gus
+&propagator
+ndadc3ip; spin 2
+&diagonalizer
+full
+&eigen
+ps 82.5
+thresh 0.1
+EOF
+
+# Clean up the mess
+rm -f capint.txt HForbenergy.txt moint.dat  orbital1.txt\
+ orbital4.txt  orbital.txt  soint.txt dipAO.txt fort.555  mocoef.txt\
+ moint.txt  orbital2.txt  orbital.tmp   overlap.txt  xyz.txt

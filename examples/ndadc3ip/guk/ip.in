@@ -1,0 +1,134 @@
+#!/bin/bash
+
+molec=`echo $PWD | awk 'BEGIN{FS="/"}{print $(NF-1)}'`
+basis=`echo $PWD | awk 'BEGIN{FS="/"}{print $(NF)}'`
+
+tmpa=/tmp/			 # temporary root-directory
+
+active="1 to 50"                 # active orbital space
+
+maxorb=50                        # maximal number of orbitals
+maxfun=$maxorb                   # maximal number of orbitals in one symmetry
+
+symgroup="D2H"                   # symmetry line or constanti
+sym_nmbs="1 2 3 4 5 6 7 8"                  # symmetry numbers of non-empty irreps
+
+#         1    2    3    4    5    6    7    8
+#        ---------------------------------------
+#  Cs     a'   a"
+#  Ci     ag   au
+#  C2      a    b
+#  D2      a   b1   b2   b3
+#  C2v    a1   a2   b1   b2
+#  C2h    ag   bg   au   bu
+#  D2h    ag  b1g  b2g  b3g   au  b1u  b2u  b3u
+
+#
+#
+#############################################################################
+#
+# some settings:
+
+# normally no changes beyond this point
+export OMP_NUM_THREADS=8
+
+
+# define filenames
+zmatrix=_zmatrix.dat
+basisset=_basisset.dat
+
+# go to temporary directory
+odir=$PWD
+tdir=/$tmpa/$USER/$molec/$basis/DIP
+mkdir -p $tdir
+cp $zmatrix $tdir
+cp $basisset $tdir
+cd $tdir
+
+# gamess-environment:
+export ed3=dfile
+export ed6=vfile
+
+# ADC-environment:
+export dfile=$tdir/dfile
+export vfile=$tdir/vfile
+
+#count (actual) number of symmetries
+j=0; 
+for i in $sym_nmbs; do 
+  j=$(($j+1)); 
+done
+maxsym=$j
+
+# some output
+echo This calculation was done on `hostname`
+
+#
+#
+#############################################################################
+#
+# SCF-Calculation:
+
+
+echo "#begin<scf>"
+gamess << EOF
+title
+$molec SCF calculation (basis $basis)
+charge 0
+harmonic off
+`cat $zmatrix`
+integral high
+`cat $basisset`
+Threshold 8
+vectors extguess
+iprint scf
+enter 1
+EOF
+echo "#end<scf>"
+
+
+#
+#
+#############################################################################
+#
+# SCF-Transformation
+
+echo "#begin<trans>"
+gamess << EOF
+restart
+title
+$molec transformation to MO-basis (basis $basis)
+charge 0
+harmonic off
+`cat $zmatrix`
+integral high
+`cat $basisset`
+bypass hf
+runtype transform
+active
+$active
+end
+threshold 8
+vectors 1
+enter 1
+EOF
+echo "#end<trans>"
+
+
+#
+#
+#############################################################################
+#
+# ADC IP calculation
+
+$odir/../../../theADCcode << EOF
+&frontend
+guk
+&propagator
+ndadc3ip; spin 2
+&diagonalizer
+full
+&eigen
+ps 82.5
+thresh 0.1
+EOF

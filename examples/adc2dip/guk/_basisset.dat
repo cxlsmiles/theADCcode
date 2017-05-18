@@ -1,0 +1,64 @@
+basis
+#  DZP (Dunning)  EMSL  Basis Set Exchange Library  10/5/09 4:38 AM
+# T.H. DUNNING, JR., J. CHEM. PHYS. 53, 2823 (1970). 
+#  T.H. DUNNING, JR. AND P.J. HAY, IN METHODS OF ELECTRONIC STRUCTURE THEORY, 
+#  VOL. 2, H.F. SCHAEFER III, ED., PLENUM PRESS (1977).
+#   
+#  H - F: T.H. DUNNING JR. AND P.J. HAY, IN METHODS OF ELECTRONIC STRUCTURE 
+#               THEORY VOL. 2, H.F. SCHAEFER III, ED., PLENUM PRESS (1977). 
+#   Si - Cl:    E. MAGNUSSON AND H.F. SCHAEFER III, JCP 83, 5721 (1985).
+#   
+#
+# !!!! The basis is uncontracted !!!!
+#
+# HYDROGEN
+S   H
+      1.0000000             19.2406000
+S   H        
+      1.0000000              2.8992000
+S   H        
+      1.0000000              0.6534000        
+S   H
+      1.0000000              0.1776000        
+P   H
+      1.0000000              1.0000000        
+# CHLORINE
+S   Cl
+      1.0000000          40850.0000000
+S   Cl        
+      1.0000000           6179.0000000
+S   Cl        
+      1.0000000           1425.0000000
+S   Cl        
+      1.0000000            409.2000000
+S   Cl        
+      1.0000000            135.5000000        
+S   Cl        
+      1.0000000             50.1300000
+S   Cl        
+      1.0000000             20.2100000        
+S   Cl
+      1.0000000              6.2830000        
+S   Cl
+      1.0000000              2.4600000        
+S   Cl
+      1.0000000              0.5271000        
+S   Cl
+      1.0000000              0.1884000        
+P   Cl
+      1.0000000            240.8000000
+P   Cl        
+      1.0000000             56.5600000
+P   Cl        
+      1.0000000             17.8500000                
+P   Cl
+      1.0000000              6.3500000
+P   Cl        
+      1.0000000              2.4030000        
+P   Cl
+      1.0000000              0.6410000        
+P   Cl
+      1.0000000              0.1838000        
+D   Cl
+      1.0000000              0.7500000        
+end

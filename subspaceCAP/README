@@ -1,0 +1,17 @@
+To compile the CAP code: pgf90 -tp k8-32 -o cap.exe input.f90 config.f90 ADC_eigenvectors.f90 CAP_MO.f90 CAP.f90 cap_Sajeev.f r2capmat.f90 *.c main.f90 -llapack -lblas -Bstatic
+
+What does the code do?  Computes the CAP matrix elements in AO basis and then transforms it in the MO basis.
+		        Then from the ADC output and those MO-CAP matrix elements, it computes the CAP in the ADC eigenvectors basis.
+                        Finally, diagonalize this matrix for several values of eta (eta being the strenght of the CAP).
+
+What does the code need? from Gamess-US, it needs the MO coeffs in mocoef.txt, position of the atoms in xyz.txt, AO basis in capint.txt
+                         from ADC, it needs the ADC eigen-values/vectors
+                         from you, an input like
+
+14 14 14 ! box size in au x,y,z
+4 ! nel
+300 0.001 'exp' ! nIcap, sIcap, increase
+0.0 ! sRcap
+3.0 85000000.0 ! eADCmin eADCmax
+'Li.traj3' ! trajectories output file
+

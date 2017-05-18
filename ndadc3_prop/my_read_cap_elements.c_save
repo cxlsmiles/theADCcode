@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "phis.h"
+#include "my_globals.h"
+
+/* braucht sicher weitere includes, vermutlich phis.h und globals.h */
+
+
+/* read_cap_elements: */
+/*                                                                          */
+/* reads the ASCII output of the secap program (outform=1)                  */
+/* this file must be present named Wse.1                                    */
+/*                                                                          */
+/* first: check if number of virtual is consistent to symtab                */
+/* reads first diagonal elements                                            */
+/* then off-diagonal elements of vitual/virtual combinations only           */
+/* storage is nevertheless in a upper-triangonal by-colum matrix including  */
+/* all 0's for the occupied orbitals because the d_matrix is supposed to be */
+/* calculated for any given one-particle operatorread from this format      */
+
+/* please notice: only molcas is supported by secap so far, this may change */
+/* if secap is based of phis one day, output stayes hoepfully the same :-)  */
+
+/* notice: virtuals are in energetical ordering, NOT in symmetry ordering!! */
+/* global indices must thus be used throughout this module                  */
+
+
+void read_cap_elements(struct inp_t *inp, struct symtab_t *symtab, double *cap_elements)
+{
+  FILE *cap_file_ptr;
+  int i=0,j=0; 
+
+  int index,index_i,index_j;
+
+  int cap_virt;
+
+  int num_virt=0, num_occ=0;          /* 0's are necesary here! */
+  int num_orb;
+
+  char buch;                          /* helper for fscanf */
+
+
+  /*---------------------------------------------------------------*/
+  /* calculate number of virtual and occupied orbitals from symtab */
+  /*---------------------------------------------------------------*/
+  for(i=1; i<= (symtab->nSym); i++){
+    num_virt=num_virt + symtab->nVir[i];
+    num_occ =num_occ  + symtab->nOcc[i];
+  }
+  num_orb= num_occ + num_virt;
+
+  /*---------------------------------------------------------------------------*/
+  /* open cap_file and compare number of virtuals to symtab number of virtuals */
+  /* overread char virtuals and enmpty line in Wse.1                           */
+  /* notice: Cap_file with name Wse.1 expected!                                */
+  /*---------------------------------------------------------------------------*/
+  cap_file_ptr=fopen(inp->cap_file,"r"); 
+  if(!cap_file_ptr){
+    printf("failed open Wse.1, please ensure that Wse.1 file is present in work directory\n");
+    printf("program will stop.\n");
+    exit(1);
+  }
+  fscanf(cap_file_ptr, "%i %s\n", &cap_virt, &buch);
+
+  if(cap_virt!=num_virt){
+    printf("Number of virtual in cap_file ( %i ) does not match number of virtuals \n read from symtab ( %i ) \n program will stop.\n", cap_virt, num_virt);
+    exit(1);
+  }
+
+  /*---------------------------------------------------------------------------*/
+  /* allocate matrix cap_elements from symtab data:                            */
+  /* initialize the matrix cap_elements with 0.0's                             */
+  /* (FIXME: might be that allocation has to be done in the main program       */
+  /* if so, just transfer these lines there.)                                  */
+  /* ANYWAY: cap_elements has to be global!!                                   */
+  /* already done by make_matrix in calling routine                            */
+  /*---------------------------------------------------------------------------*/
+
+  /*cap_elements=(double*)malloc(sizeof(double)*(num_orb*(num_orb+1)/2));
+  for(i=0; i < (num_orb*(num_orb+1))/2 ; i++){
+    cap_elements[i]=0.0;
+    }*/ 
+
+  /*--------------------------------------------------------------------------*/
+  /* read virtual diagonal elements from cap_file and store them on position :*/
+  /* ((num_occ + i)*(num_occ +i +1)/2) -1                                     */
+  /* notice: c-numbering starts at 0 !!                                       */
+  /* (FIXME: check if i==index_i)                                             */ 
+  /* do not read empty line in Wse.1 file                                     */
+  /*--------------------------------------------------------------------------*/ 
+
+  for(i=1; i<= num_virt; i++){
+    index=(((num_occ +i)*(num_occ+i+1))/2) -1;
+    fscanf(cap_file_ptr, "%i %lf", &index_i, &cap_elements[index]);
+  }
+
+  fscanf(cap_file_ptr, "\n");                /* do not read empty line */
+
+
+  /*--------------------------------------------------------------*/
+  /* read off_diagonal matrix elements and store them on position:*/
+  /* ((i+n_occ)*(i+n_occ -1))/2 -1 + n_occ+j                      */
+  /*  ||||||||||||||||||||||||||||                                */
+  /*   diag element of previous col                               */
+  /*                                ||||||||||||                  */
+  /*                                posit. in present col.        */
+  /* (FIXME: check if i==index_i and j==index_j )                 */
+  /*--------------------------------------------------------------*/
+
+  for(i=2; i<= num_virt; i++){
+    for(j=1; j<i; j++){
+      index=((num_occ+i)*(num_occ+i-1))/2 -1 +num_occ +j;
+      fscanf(cap_file_ptr, "%i %i %lf", &index_i, &index_j, &cap_elements[index]);
+    }
+  }
+
+
+  /*--------------------------------------------------------------*/
+  /* That's it, we are done                                       */
+  /* close file, some output!                                     */
+  /*--------------------------------------------------------------*/
+  fclose(cap_file_ptr);
+  printf("finished reading cap_elements: %i virtuals have been identified\n %i occupied were found, overall dimension of matrix cap_elements\n is thus %i \n", num_virt, num_occ, (num_orb)*(num_orb+1)/2);
+
+}

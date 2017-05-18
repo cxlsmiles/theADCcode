@@ -1,0 +1,22 @@
+!    He_2
+!                   
+!    ---
+!    RHF 
+!    ---
+!                       
+ $CONTRL SCFTYP=RHF ICHARG=0 ISPHER=1 QMTTOL=1.0E-6 $END
+ $GUESS  GUESS=HUCKEL                        $END
+ $SCF    NCONV=9                             $END
+ $ELMOM  IEMOM=1 IEMINT=1              $END
+!
+!    -------
+!    General                             
+!    -------
+!                                       
+ $CONTRL EXETYP=RUN MULT=1 RUNTYP=ENERGY  CCTYP=CCSD $END
+ $CCINP NCORE=1 NFZV=0 MAXCC=1 $END
+ $CONTRL UNITS=ANGS MAXIT=100 NPRINT=8       $END          
+ $INTGRL NINTMX=50000 NDAR=100000            $END
+ $SYSTEM TIMLIM=9999 MEMORY=2000000          $END
+ $CONTRL INTTYP=HONDO ICUT=40 ITOL=40        $END
+

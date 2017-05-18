@@ -1,0 +1,7 @@
+zmat angstroms
+cl
+ h   1 hcl2    
+variables
+hcl2        1.283023
+constants
+end

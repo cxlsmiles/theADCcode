@@ -1,0 +1,67 @@
+CC     =  @CC@
+CFLAGS = -I../include @CFLAGS@
+
+FC     = @F77@
+FFLAGS = -I../include @FFLAGS@ -DV@Vers@
+
+PERL   = @PERL@
+
+# dependencies
+OBJS= ../lib/libphis.a(m_init.o m_aux.o dpsort.o mc_one.o \
+phis_mc_info.o phis_mc_epsi.o phis_mc_sym.o phis_mc_occ.o \
+phis_mc_nextint.o phis_mc_scfvec.o phis_mc_overlap.o      \
+phis_mc_active.o phis_mc_geometry.o phis_mc_ao.o          \
+phis_mc_dip.o phis_mc_vel.o phis_mc_quad.o phis_mc_oneel.o)
+
+cleanfiles     = *.o *~  *.lo .libs/* .libs
+realcleanfiles = Makefile
+distcleanfiles = 
+
+.PHONY: test
+
+# actions
+all: $(OBJS)
+
+test: 
+	cd test/; \
+	$(PERL) test.pl
+
+include ../include/cleanup.mk
+# DO NOT DELETE THIS LINE - used by make depend
+m_init.o:           ../include/phis.h    ../include/config.h    ../include/molcas.h
+
+m_aux.o:            ../include/molcas.fh ../include/info.inc
+
+mc_one.o:           ../include/molcas.fh ../include/info.inc
+
+phis_mc_active.o:   ../include/molcas.fh ../include/info.inc
+
+phis_mc_ao.o:       ../include/molcas.fh ../include/info.inc
+
+phis_mc_dip.o:      ../include/molcas.fh ../include/info.inc
+
+phis_mc_epsi.o:     ../include/molcas.fh ../include/info.inc
+
+phis_mc_geometry.o: ../include/molcas.fh ../include/info.inc
+
+phis_mc_info.o:     ../include/molcas.fh ../include/info.inc
+
+phis_mc_nextint.o:  ../include/molcas.fh ../include/info.inc
+
+phis_mc_occ.o:      ../include/molcas.fh ../include/info.inc
+
+phis_mc_oneel.o:    ../include/molcas.fh ../include/info.inc
+
+phis_mc_overlap.o:  ../include/molcas.fh ../include/info.inc
+
+phis_mc_quad.o:     ../include/molcas.fh ../include/info.inc
+
+phis_mc_scfvec.o:   ../include/molcas.fh ../include/info.inc
+
+phis_mc_sym.o:      ../include/molcas.fh ../include/info.inc
+
+phis_mc_vel.o:      ../include/molcas.fh ../include/info.inc
+
+dpsort.o:
+
+

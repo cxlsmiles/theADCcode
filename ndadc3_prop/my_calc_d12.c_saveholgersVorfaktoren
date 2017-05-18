@@ -1,0 +1,234 @@
+/* ACHTUNG, DA SIND EIN PAAR NICHT_KORRIGIERTE VORZEIVHENFEHLER DRIN; DIE MIT HOLGERS ANDEREN VORFAKTOREN ABSOLUT NIX ZU TUN HABEN !!!! */
+
+
+#include "phis.h"
+#include "my_globals.h"
+#include "my_adc_macros.h"
+
+static char *cvsid="$Id: calc_d12.c,v 1.0 date time imke Exp $";
+
+/* cap_calc_d12.c: 
+ *
+ * calculates the hole/2h1p block of the ISR using the formulae by 
+ * Trofimov and Schirmer (and the implementation of the ISR by jb)
+ *
+ * 'OUTPUT' d12_matrix
+ * 'INPUT' cap_elements, matrix of (MO/CAP/MO) in upper-triangleby col
+ *  format, may also be used for any operator (appropriate filling)
+ *
+ * $Log: 
+ */
+
+
+/* ----------------------------------------------------------------- */
+/* NOMENCLATURE NOTE:                                                */
+/*                                                                   */
+/* still not using ' Indexes, thus:                                  */
+/* i -> j, a'->a, i'->k, j'->l, and therefore: c->p, k->q            */
+/* sorry for confusing inconvenience !!                              */
+/* this time no changes to jb's nomenclature ....                    */
+/*------------------------------------------------------------------ */
+              
+
+void cap_calc_d12(struct inp_t *inp, struct scf_t *scf, struct symtab_t *symtab,
+                  double *d12_matrix, double *cap_elements)
+{
+  int a_sym, k_sym, l_sym, kI_sym;     /* used in macro FOR_ALL_2H1P_AKL */
+  int *a, *k, *l;                      /* used in macro FOR_ALL_2H1P_AKL */
+  int *j, *p, *q;
+  int p_sym;
+
+  double v_klpa, v_klap;
+  double epsi_a, epsi_k, epsi_l, epsi_p, epsi_q;
+
+  double sum_1, sum_2;
+  double wij_1=0.0, wij_2=0.0;
+
+  double *d_ptr=d12_matrix;       /* pointer progressing two cols if k!=l */
+                                  /* one if k==l                           */
+
+  /*----------------------------------------------------------------------*/
+
+
+  FOR_ALL_2H1P_AKL({
+    /* akl part of 2h1p loop (k!=l) */
+
+    epsi_a = scf->epsi[*a];
+    epsi_k = scf->epsi[*k];
+    epsi_l = scf->epsi[*l];
+
+
+    FOR_OCC_IN_SYM(j,inp->sym){
+      /* go through the matrix columnwise by incrementing the pointer */
+      /* FIXME: change concept in order to avoid to call everything twice */
+      
+      /* initialize wij_1/2 */
+      wij_1 = wij_2 = 0.0;
+
+      /* (8c) */
+      FOR_VIR_IN_SYM_WE(p,inp->sym,epsi_p){
+
+	v_klpa = V1212(k,l,p,a);
+	v_klap = V1212(k,l,a,p);
+
+	sum_1 = SQRT_1_2 * (-v_klpa - v_klap) / (epsi_k+epsi_l-epsi_p-epsi_a);
+
+	wij_1 += sum_1 * CAP_PTR(p,j);          /*d_element(p,j,cap_elements);*/
+      }
+
+      /* (8a) and (7) delta_ii'=delta_jk */
+
+      if(*k==*j){
+	/* 7b */
+	wij_1 += SQRT_1_2 * CAP_PTR(l,a);      /*d_element(l,a,cap_elements); */
+
+	/* 8a */
+
+	for(p_sym=1; p_sym<=symtab->nSym; p_sym++){
+	  FOR_VIR_IN_SYM_WE(p,p_sym,epsi_p){
+	    FOR_OCC_IN_SYM_WE(q,p_sym,epsi_q){
+ 
+	      sum_1 = 
+		(2.0 *V1212(q,l,p,a) - V1212(q,l,a,p))
+		 / (epsi_q + epsi_l - epsi_p - epsi_a);
+
+	      wij_1 += SQRT_1_2 * sum_1 * CAP_PTR(p,q);   /*d_element(p,q,cap_elements);*/
+	    }
+	  }
+	}
+      }   
+      /* (8b) and (7) delta_ij' = delta_jl */
+      else if(*j==*l){
+	/* 7a */
+	wij_1 += SQRT_1_2 * CAP_PTR(a,k);               /*d_element(a,k,cap_elements);*/
+
+	/* 8b */
+
+	for(p_sym=1; p_sym<=symtab->nSym; p_sym++){
+	  FOR_VIR_IN_SYM_WE(p,p_sym,epsi_p){
+	    FOR_OCC_IN_SYM_WE(q,p_sym,epsi_q){
+
+	      sum_1 = 
+		( 2.0*V1212(q,k,p,a) - V1212(q,k,a,p))
+		/ (epsi_q + epsi_k - epsi_p - epsi_a); 
+
+	      wij_1 += SQRT_1_2 * sum_1 * CAP_PTR(p,q);  /*d_element(p,q,cap_elements);*/
+	    }
+	  }
+	}
+      }
+      *(d_ptr++) += wij_1;
+    }
+ 
+    FOR_OCC_IN_SYM(j,inp->sym){
+      /* go through the matrix columnwise by incrementing the pointer */
+      /* second time to go through all occupied orbs ...  */
+
+      /* initialize wij_1/2 */
+      wij_1 = wij_2 = 0.0;
+
+      /* (8c) */
+      FOR_VIR_IN_SYM_WE(p,inp->sym,epsi_p){
+
+	v_klpa = V1212(k,l,p,a);
+	v_klap = V1212(k,l,a,p);
+
+	sum_2 = SQRT_3_2 * ( v_klpa - v_klap) / (epsi_k+epsi_l-epsi_p-epsi_a);
+
+	wij_2 += sum_2 * CAP_PTR(p,j);          /*d_element(p,j,cap_elements);*/
+      }
+
+      /* (8a) and (7) delta_ii'=delta_jk */
+
+      if(*k==*j){
+	/* 7b */
+	wij_2 += SQRT_3_2 * CAP_PTR(l,a);       /*d_element(l,a,cap_elements);*/
+
+	/* 8a */
+
+	for(p_sym=1; p_sym<=symtab->nSym; p_sym++){
+	  FOR_VIR_IN_SYM_WE(p,p_sym,epsi_p){
+	    FOR_OCC_IN_SYM_WE(q,p_sym,epsi_q){
+ 
+	      sum_1 = 
+		(2.0 *V1212(q,l,p,a) - V1212(q,l,a,p))
+		 / (epsi_q + epsi_l - epsi_p - epsi_a);
+
+	      wij_2 += SQRT_3_2 * sum_1 * CAP_PTR(p,q);   /*d_element(p,q,cap_elements);*/
+	    }
+	  }
+	}
+      }   
+      /* (8b) and (7) delta_ij' = delta_jl */
+      else if(*j==*l){
+	/* 7a */
+	wij_2 += SQRT_3_2 * CAP_PTR(a,k);               /* d_element(a,k,cap_elements);*/
+
+	/* 8b */
+
+	for(p_sym=1; p_sym<=symtab->nSym; p_sym++){
+	  FOR_VIR_IN_SYM_WE(p,p_sym,epsi_p){
+	    FOR_OCC_IN_SYM_WE(q,p_sym,epsi_q){
+
+	      sum_1 = 
+		( 2.0*V1212(q,k,p,a) - V1212(q,k,a,p))
+		/ (epsi_q + epsi_k - epsi_p - epsi_a); 
+
+	      wij_2 += SQRT_3_2 * sum_1 * CAP_PTR(p,q);  /*d_element(p,q,cap_elements);*/
+	    }
+	  }
+	}
+      }
+      *(d_ptr++) += wij_2;
+    }
+  },{
+    /* akk part of 2h1p loop */
+
+    epsi_a = scf->epsi[*a];
+    epsi_k = scf->epsi[*k];
+
+    FOR_OCC_IN_SYM(j,inp->sym){
+      /* go through vector columnwise by incrementing the pointer */
+
+      /* initialize wij_1/2 */
+      wij_1 = wij_2 = 0.0;
+
+      /* (8c) */
+      FOR_VIR_IN_SYM_WE(p,inp->sym,epsi_p){
+
+	sum_1 = -V1212(k,k,p,a);
+
+	wij_1 += sum_1 * CAP_PTR(p,j);          /*d_element(p,j,cap_elements);*/
+      }
+
+      /* (8a) and (7) delta_ii'=delta_jk */
+
+      if(*k==*j){
+
+	/* 7b  reminder k==l! */
+	wij_1 += CAP_PTR(k,a);                 /*d_element(k,a,cap_elements);*/
+
+	/* 8a reminder k==l! */
+	for(p_sym=1; p_sym<=symtab->nSym; p_sym++){
+	  FOR_VIR_IN_SYM_WE(p,p_sym,epsi_p){
+	    FOR_OCC_IN_SYM_WE(q,p_sym,epsi_q){
+
+	      sum_1 = 
+		( V1212(q,k,p,a) - V1212(q,k,a,p))
+		/ ( epsi_q + epsi_k - epsi_a -epsi_p);
+
+	      wij_1 += sum_1 * CAP_PTR(p,q);   /*d_element(p,q,cap_elements); */
+	    }
+	  }
+	}
+      }
+      *(d_ptr++) += wij_1;
+    }
+  });
+
+
+
+
+}
+
+

@@ -1,0 +1,32 @@
+C
+C These are directly from MOLCAS/include to interface with seward data.
+C Were used next 3 files: 
+C 1) itmax.inc
+C 2) info.inc
+C 3) WrkSpc.inc
+  
+      Include 'info.inc'
+
+C Only because I want to use these I decided to use "implicit real*8", 
+C which is a truly evil feature of FORTRAN. info.inc defines quite a 
+C number of variables, so be careful with name clashes.
+C
+      Integer RtoI, ItoB
+      Parameter (RtoI = 1, ItoB = 8)
+
+      Integer nBasSum, nActSum, nAtom
+      Real*8 Escf
+      Integer myBas(MxSym), nOrb(MxSym), nOcc(MxSym), 
+     &        nAct(MxSym), nFro(MxSym), nDel(MxSym)
+      Integer MapToExternal(MxBas)
+      Character*80 TraOneF,OneIntF,InpOrbF,TraIntF,RunFileF
+      Parameter (TraOneF="TRAONE",OneIntF="ONEINT",InpOrbF="INPORB",
+     &TraIntF="TRAINT",RunFileF="RUNFILE")
+
+      Real*8 Coor(3,mxdc),Znuc(mxdc)
+
+      Common /PHIS_MC/ nBasSum, nActSum,
+     &     Escf,
+     &     myBas, nOrb, nOcc, nAct, nFro, nDel,
+     &     MapToExternal,
+     &     Coor, Znuc, nAtom

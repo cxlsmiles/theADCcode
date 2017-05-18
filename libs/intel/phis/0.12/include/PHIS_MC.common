@@ -1,0 +1,14 @@
+      Integer nBasSum, nActSum, nAtom
+      Integer MapToExternal(5000)
+      Integer myBas(8), nOrb(8), nOcc(8), 
+     &        nAct(8), nFro(8), nDel(8)
+
+      Real*8 Coor(3,500),Znuc(500),Escf
+
+      Common /PHIS_MC/ nBasSum, nActSum,
+     &     Escf,
+     &     myBas, nOrb, nOcc, nAct, nFro, nDel,
+     &     MapToExternal,
+     &     Coor, Znuc, nAtom
+
+

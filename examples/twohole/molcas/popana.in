@@ -1,0 +1,65 @@
+#!/bin/bash
+
+echo This calculation was done on `hostname`
+#
+#############################################################################
+#
+# Molcas SCF run
+
+mol="lih"
+export WorkDir=`pwd`
+
+cat <<EOF > $mol.inp
+&SEWARD
+SYMM
+x y
+Basis set
+H.3-21G....
+ H  0.000 0.000  0.000 angstrom
+End of basis
+Basis set
+Li.3-21G....
+ Li 0.000 0.000 1.595000 angstrom
+End of basis
+&SCF
+&MOTRA
+FROZen
+0 0 0 0 
+EOF
+
+
+molcas $mol.inp
+
+mv  $mol.RunFile RUNFILE
+mv  $mol.ScfOrb  INPORB
+mv  $mol.TraInt  TRAINT
+mv  $mol.TraOne  TRAONE
+mv  $mol.OneInt  ONEINT
+#
+#
+#############################################################################
+#
+# ADC DIP calculation
+
+
+../../../theADCcode << EOF
+&frontend
+molcas
+&propagator
+spin 1 3; adc2dip; sym 1 ;
+&diagonalizer
+lanczos; iter 100
+&eigen
+ps 0.1
+thresh 0.5
+&popana
+h 1 2
+s1 3 4
+p1 5..7
+s2 8
+p2 9..11
+EOF
+
+# Clean up the mess
+rm -f $mol.* extract.xml  molcas*  stdin RUNFILE INPORB TRAINT TRAONE ONEINT
+

@@ -1,0 +1,561 @@
+2006-09-06  Vysotskiy Vitja  <vitjaphen@ngs.ru>
+	
+	* interface to MOLCAS v6.* was done
+	* more output in debugging mode 
+	* added support for x86_64 
+	* automatically working with include files of MOLCAS
+	
+2004-12-06  Alex Thiel  <stderr@web.de>
+
+	Part of Patch 0.10.1
+	One-electron Hamiltonian.
+	
+	* phis_mc_oneel.f: New file. Very similar to the implementation of
+	the other one-electron properties.
+	* molcas.h: Updated accordingly.
+	* m_init.c: Likewise.
+	* Makefile.in: Likewise.	
+
+2004-06-17  Alex Thiel  <stderr@web.de>
+
+	Part of Patch 0.9.1
+	Quadrupol integrals.
+
+	* phis_mc_quad.c: New file. Straightforward implementation similar
+	to the dipol integrals.
+	* molcas.h: Updated accordingly.
+	* m_init.c: Likewise.
+	* Makefile.in: Likewise.
+	
+2004-05-05  Alex Thiel  <stderr@web.de>
+
+	Patch 0.8.3
+	Bugfixes for the new one-electron transformation.
+	The INPORB file stores as many SCF vectors as there are basis
+	functions, i.e. including those that have been deleted due to
+	linear dependencies. The vector unblocking code was still based
+	on the number of orbitals.
+
+	* mc_one.f (mc_one_transform): Dimensions have been interchanged
+	in the declaration of C, the field of SCF coefficients.
+	* phis_mc_scfvec.f: Removed check for nBas != nOrb. This is really
+	irrelevant here. Check for nBasSum == nAO instead.
+	(mc_unblock_scfvec): Assume that there are nBas SCF orbitals instead
+	of nOrb.
+	(mc_transform_scfvec): Added a compile time variable to switch off
+	the transformation for debugging purposes.
+	(mc_read_scfvec): Fixed typo in FileName.
+	Pass the right number of functions to RdVec().
+	
+2004-04-05  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.8.2
+	Fix transformation of one-electron matrices. 
+	The SCF coefficients for this transformation were read from the
+	ONEINT file before. This is inconsistent since the MOTRA program
+	reads these coefficients from the INPORB file.
+
+	* phis_mc_scfvec.f (mc_read_scfvec): Call RdVec() to read the SCF
+	vectors instead of RdCom().
+	* m_init.c: Overlap integrals disabled, since these are not yet
+	consistent with the new SCF vectors.
+	
+2004-04-02  Alexander Thiel  <stderr@web.de>
+
+	Part of patch 0.8.1
+	Implement dipol matrix elements in velocity form.
+
+	* mc_one.f: New file, collected all the routines that are common
+	to the one-electron handling here and gave them more generic names.
+	The routines now take the name of the ONEINT file section as an
+	argument where appropriate.
+	(mc_proc_one): Moved from phis_mc_dip.f (mc_proc_dip).
+	(mc_one_transform): Moved from phis_mc_dip (mc_dip_transform).
+	(read_and_expand): Moved from phis_mc_dip.f.
+	* phis_mc_dip.f: Modified to conform to the new ONEINT handling.
+	* phis_mc_vel.f: New file, basically identical to phis_mc_dip.f.
+	* Makefile.in (mc_one.o): Added.
+	(phis_mc_vel.o): Added.
+	* m_aux.f (mc_query_vel): New function to detect the presence of
+	velocity integrals.
+	* m_init.c: Hook phis_mc_vel() into the interface and set the
+	capabilities accordingly.
+	(mc_stop): New function to be able to terminate with EXIT_FAILURE
+	from within a Fortran routine.
+	* molcas.h: Updated according to the above changes.
+	* test/test.pl: Call dump_out in symmetry-first and energy-first
+	mode to check that all parts of PHIS can be executed.
+	* test/test.0: SDipol directive added, to have at least one test
+	use this new feature.
+	
+2004-03-31  Alexander Thiel  <stderr@web.de>
+
+	Part of patch 0.7.103
+
+	* test/test.pl: Relaxed requirement on the Perl version a little.
+	
+2004-03-26  Alexander Thiel  <stderr@web.de>
+
+	Part of patch 0.7.102
+	Script cleanup.
+
+	* test/test.pl: Cleaned up the script removing some assumptions
+	about the environment and making it stand-alone. Note that this
+	now requires a Perl version 5.6.1 or later.
+	Made the script exit if a test fails.
+	* Makefile.in (test): New target, executes test/test.pl.
+	(m_init.o): Dependencies on header files added.
+	Removed configure stuff from the realclean and distclean.
+	* molcas.h: Include config.h explicitly.
+	
+2004-03-25  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.7.101
+	This patchset fixes the code for the dipole integrals. They have
+	been reported in the SO basis before.
+	
+	* phis_mc_scfvec.f: This has to be completely reworked. I start
+	with some small changes to make the dipole code work.
+	(mc_read_scfvec): New routine that returns the SCF vectors in
+	terms of the SO basis.
+	(mc_unblock_scfvec): Replaces unblock_matrix(). This routine now
+	takes care of the MO part (freezing/deleting/reordering MOs) and
+	leaves the vectors themselves alone.
+	(mc_transform_scfvec): New routine that implements the second part
+	of the obsolete unblock_matrix() routine: performs  the SO->AO
+	transformation of the SCF vectors.
+	(generate_SOtoAO): Added some more parameters to differentiate
+	between MOs, SOs and AOs.
+
+	* phis_mc_dip.f: Changed the code layout a bit since I need some
+	additional dynamic arrays.
+	(mc_proc_dip): Additional subroutine that receives the dimensions
+	and dynamically declares some helper arrarys.
+	(read_dip): Is moved inside mc_proc_dip() and renamed
+	read_and_expand(). Also handles unblocking now.
+	(copy_and_expand): Replaced by mc_dip_transform() inside
+	mc_proc_dip(). 
+	(mc_dip_transform): Performs the SO->MO transformation.
+	
+	* m_init.c: HAVE_DIP added for energy-first ordering.  Removed
+	HAVE_SCFVEC at the same time since this has not been tested at
+	all.
+	
+2004-03-22  Alexander Thiel  <stderr@web.de>
+
+	Part of patch 0.7.100
+	Streamline configuration.
+	* configure.ac: Removed.
+
+2004-03-10  Alexander Thiel  <stderr@web.de>
+
+	This patch removes the functionality to display frozen/deleted
+	orbitals. Detailed changes:
+	* m_aux.f (mc_setup): Always read the active orbitals from TraOne.
+	(mc_maps): Never use nOrb for active orbitals.
+	
+2004-02-06  Alexander Thiel  <stderr@web.de>
+
+	* m_aux.f (mc_maps): Bug due to improperly decared array - fixed.
+
+2003-09-08  Alexander Thiel  <stderr@web.de>
+
+	* mc_list_active.f: Renamed to ...
+	* phis_mc_active.f: ... this. Use MapToExternal() instead of
+	MapToActive().
+	* m_get_overlap.f: Renamed to ...
+	* phis_mc_overlap.f: ... this.
+	* Makefile.in: Updated accordingly.
+	* molcas.h: Likewise.
+	* m_init.c: Likewise.
+
+	* molcas.fh.in: MapToExternal() replaces MapToActive() and
+	MapUnblock().
+	* m_aux.f: Rewrite of the orbital mapping code.
+	* phis_mc_epsi.f: Use MapToExternal(), cleaned up the code.
+	* phis_mc_occ.f: Likewise.
+	* phis_mc_sym.f: Likewise.
+	* phis_mc_nextint.f: Use MapToExternal().
+
+2003-09-08  Alexander Thiel  <stderr@web.de>
+
+	* configure.ac: Minor typo in error message fixed.
+
+2003-06-30  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis_mc_geometry.f: Now provides nuclear charges, too.
+	* phis_mc_ao.f: Cosmetic changes.
+	
+2003-06-28  Alexander Thiel  <stderr@web.de>
+
+	* m_get_scfvec.f: Renamed to...
+	* phis_mc_scfvec.f: this, for consistency. Lots of comments added
+	and cleaned up the code.
+	* Makefile.in (OBJS): Changed accordingly.
+	* m_init.c: Likewise.
+	* molcas.h: Likewise.
+
+	* phis_mc_epsi.f: Fixed calculation of the HF energy.
+	
+2003-06-27  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* m_get_scfvec.f: Integer*4 declared where appropriate.
+	* phis_mc_ao.f: Likewise.
+
+2003-06-06  Alexander Thiel  <stderr@web.de>
+
+	* m_aux.f (unblock_matrix): Subroutine moved...
+	* m_get_scfvec.f: ...here. Also includes massive changes to
+	implement SO->AO mapping. This is completely untested as of
+	now!
+	* phis_mc_ao.f: Support for spherical functions added.
+	* m_init.c: Announce atomic orbitals.
+	
+	* phis_mc_geometry.f: Set Z_nuc to an impossible value (-1)
+	instead of leaving it uninitialized.
+	* molcas.h (phis_mc_geometry): Fixed prototype.
+	
+2003-06-04  Joerg Breidbach  <joergb@tc.pci.uni-heidelberg.de>
+
+	* phis_mc_geometry.f (phis_mc_geometry): nuclear charges (Z_nuc) 
+	added in function variables, but Z_nuc remains untouched in
+	function!
+
+2003-03-26  Alexander Thiel  <stderr@web.de>
+
+	* phis_mc_dip.f: New file.
+	* Makefile.in: Updated accordingly.
+	* molcas.h: Provide prototype.
+	* m_init.c: Set up the interface.
+	
+2003-02-07  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* m_aux.f (m_setup): Forgot to clean up some code. Fixed.
+
+2003-02-06  Alexander Thiel  <stderr@web.de>
+
+	* phis_mc_ao.f: New file.
+	* Makefile.in: Updated accordingly.
+	* m_init.c: Plugged phis_mc_ao into interface, but not announced
+	in capabilities - this is still under developement.
+	* molcas.h (molcassetup): Called m_setup for a while now,
+	prototype fixed.
+
+	* m_aux.f: Commented out some debug code.
+
+2002-12-02  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* dpsort.f: New file, code found at www.netlib.org. (Renamed the
+	function call to mc_dpsort() to avoid conflicts.)
+	This is used to generate a map that puts indices in energetical
+	order.
+	* Makefile.in: Updated accordingly.
+
+	* molcas.fh.in (MapUnblock): Declares new common array,
+	* m_aux.f: it is initialized here...
+	* phis_mc_epsi.f, phis_mc_sym.f, phis_mc_occ.f: and used here.
+	
+	* m_init.c: Returns capabilities according to the value of the
+	SYM_BLOCKED flag now.
+	
+	* phis_mc_geometry.f: New functionality.
+	* Makefile.in, molcas.h, m_init.c: Updated accordingly.
+	
+	* configure.ac: Add -g to FFLAGS when debugging.
+
+2002-11-29  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* m_aux.f (m_setup): Call inter1() instead of SewIni() to get
+	processed info on geometry.
+	* molcas.fh.in: nAtom, zNuc and Coor added to common block.
+	* phis_mc_info.f: Now trivial fix of argument nCenters.
+
+	* phis_mc_nextint.f: Replaces molcas5.f, updated for new seward
+	code.
+	* m_get_overlap.f: Adopted to new seward interface.
+	* m_get_scfvec.f: Same.
+	* m_list_active.f: Same.
+	* Makefile.in, m_init.c, molcas.h: Updated accordingly.
+
+2002-11-28  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* molcas.fh.in: Include some Molcas .inc files directly. For
+	this to work smoothly, we have to use implict real*8 everywhere
+	molcas.fh is included. Renamed array nBas() to myBas().
+	* m_aux.f: Call SewIni() to interface to seward data, instead of
+	doing everything by hand. Stolen from MOLCAS/src/sewutil/inter1.f
+
+	* phis_mc_info.f, phis_mc_epsi.f, phis_mc_sym.f, phis_mc_occ.f: 
+	These replace molcas{0,1,2,3} with some changes to support the
+	new seward interface code.
+	
+	* molcas.h: Changed accordingly and temporarily
+	removed the functions that are not yet converted.
+	* m_init.c: Likewise.
+	* Makefile.in: Likewise.
+
+2002-09-16  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* configure.ac (FFLAGS): Append MOLCAS include directory.
+	(CFLAGS): If debugging is requested and we use gcc, do not use 
+	-O2 and add -Wall.
+
+2002-06-07  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* configure.ac: Check for $MOLCAS.
+
+	* m_aux.f: Read PotNuc from ComFile. Fixed issues with linear
+	dependent orbitals.
+	* m_get_overlap.f: Consistency check added.
+	* molcas1.f: Fixed issues with linear dependent orbitals.
+
+	* test/: New directory.
+	
+2002-05-08  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* molcas.fh.in: nOrb added.
+	* m_aux.f: Replaced nBas by nOrb where appropriate.
+	nOrb() contains the number of valid SCF vectors. This is implemented
+	in a way that nOrb() plays the role of nAct() if all orbitals are
+	requested. MapToActive() takes care of the rest.
+
+2002-04-30  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* mc_list_active.f: Need to declare arguments as Integer*4. 
+	* molcas.fh.in: Added nOcc and Escf again.
+	* m_aux.f (mc_scf_info): Renamed to mc_rd_comfile. This now reads
+	the entire SCF_INFO section and passes it via the common block as 
+	before.
+	(mc_tra_one): Renamed to mc_rd_traone. This now sets nAct, nFro 
+	and nDel only.
+	(m_setup): Implement support for the SHOW_INACTIVE flag: Call 
+	mc_rd_traone only if this flag is not set. Use unit map otherwise.
+	Note that SHOW_INACTIVE does not work with Vpqrs().
+
+	* molcas1.f: Removed call to mc_scf_info.
+	* molcas3.f: Likewise.
+	
+2002-04-25  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* m_aux.f(mc_scf_info): Pass Escf and nOcc as parameters instead
+	of common variables.
+	(m_setup): Flags parameter added.
+	Call to mc_scf_info moved...
+	* molcas3.f: ...here.
+	* molcas.fh.in: Escf and nOcc removed.
+	* molcas1.f: Call mc_scf_info to get Escf.
+
+	* m_init.c: Pass flags to m_setup().
+
+	* m_get_overlap.f: Read overlap from OneInt instead of TraOne.
+	
+2002-04-21  Alexander Thiel  <stderr@web.de>
+
+	* mc_list_active.f: New file.
+	* Makefile.in (mc_list_active.o): Added.
+	* m_init.c: Likewise.
+	* m_aux.f (unblock_matrix): New function.
+	(unblock_packed): Likewise.
+	* m_get_overlap.f: Return value fixed; debug output removed.
+	Now uses nBas instead of nAct; unpacks matrix.
+	* m_get_scfvec.f: Calling convention fixed; returns unpacked matrix.
+	* molcas1.f: Debug output removed.
+	* molcas.h: mc_list_active added, m_get_scfvec fixed.
+	
+2002-04-04  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* m_get_scfvec.f (m_get_scfvec): FIXME: call has to be changed
+	according to SPEC
+
+2002-03-14  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* m_get_overlap.f: Changed according to specs version 0.6.
+	nOrb renamed to nAct
+	* m_get_secfvec.f: Likewise.
+	* molcas0.f: Likewise.
+	* molcas1.f: Likewise.
+	* molcas2.f: Likewise.
+	* molcas3.f: Likewise.
+	* m_aux.f: nOrb renamed to nAct
+	* molcas.fh.in: Likewise.	
+	* molcas5.f: Likewise.
+	
+2002-03-13  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* molcas1.f (molcas1): Fixed sign of PotNuc.
+
+	* configure.ac: AC_SUBST added for RotI and ItoB.
+
+2002-03-12  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* m_init.c (molcas_init_hook): Removed initialization of 2e integrals.
+
+	* molcas.h: Changed according to latest changes in the specs.
+
+	* configure.ac (FFLAGS): Added -i8 for DEC. Likewise for RtoI and ItoB.
+	(CFLAGS): Removed -I../include.
+	(AC_OUTPUT): molcas.fh added.
+	* molcas.fh: Renamed...
+	* molcas.fh.in: ... to this. Configure takes care of RtoI and ItoB.
+	* Makefile.in (CFLAGS): -I../include added.
+
+	* molcas0.f: Explicitly specified Integer*4 for all externally
+	accessible integers.
+	Likewise for any FORTRAN file in this directory.
+	
+2002-03-12  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* configure.ac (FFLAGS): Added -i8 for DEC. Likewise for RtoI and ItoB.
+	(CFLAGS): Removed -I../include.
+	(AC_OUTPUT): molcas.fh added.
+	* molcas.fh: Renamed...
+	* molcas.fh.in: ... to this. Configure takes care of RtoI and ItoB.
+	* Makefile.in (CFLAGS): -I../include added.
+
+	* molcas0.f: Explicitly specified Integer*4 for all externally
+	accessible integers.
+	Likewise for any FORTRAN file in this directory.
+
+2002-03-01  Alexander Thiel  <stderr@web.de>
+
+	* molcas.fh: Included Escf and PotNuc in common block.
+	* m_aux.f (mc_scf_info): Fill Escf.
+	(mc_tra_one): Fill PotNuc.
+	
+	* molcas0.f: Changed according to latest changes in the specs.
+	* molcas1.f: Likewise.
+	* molcas.h: Likewise.
+	* m_init.c: Function calls changed accordingly.
+	
+2002-02-19  Alexander Thiel  <stderr@web.de>
+	
+	* m_get_scfvec.c: Added. 
+	* m_get_overlap.c: Likewise.	
+	* Makefile.in (OBJS): m_get_scfvec.o and m_get_overlap.o added.
+	* m_init.c: Interface set for these functions. Include phis.h...
+	* molcas.h: ...here
+
+2002-02-16  Alexander Thiel  <stderr@web.de>
+
+	* molcas0.f: Dummy entries for Escf and Enuc
+
+2002-02-10  Alexander Thiel  <stderr@web.de>
+
+	* molcas4.c: Remove; functionality moved to ../phis.
+	* Makefile.in: Updated acccordingly.
+	* m_init.c: Likewise.
+	Filling of TwoE array moved to ../phis.
+
+2002-02-08  Alexander Thiel  <stderr@web.de>
+
+	* m_init.c (molcas_init_hook): Obsolete (and misleading) comment 
+	removed.
+
+2002-02-07  Alexander Thiel  <stderr@web.de>
+
+	* ixset.c: Moved to ../phis
+	* molcas4.c (molcas4): Pulled out of ixset.c
+	* Makefile.in: Updated accordingly.
+	* molcas.h (ixset): Moved to phis.h.
+	molcas.h (canonicalize): Likewise.
+
+2002-02-06  Alexander Thiel  <stderr@web.de>
+
+	* Makefile.in (realcleanfiles): config.cache added.
+
+2002-01-29  Alexander Thiel  <stderr@web.de>
+
+	* Makefile.in: include cleanup.mk 
+
+	* Makefile.in: targets clean, realclean and distclean added.
+
+	* molcas?.f90, m_aux.f90, molcas_setup.90: All Fortran 90 files 
+	removed.
+
+2002-01-26  Alexander Thiel  <stderr@web.de>
+
+	* molcas?.f, m_aux.f, molcas.fh: Added.
+	* configure.ac: F77 configuration added.
+
+	* Makefile.in: autoconf macros for F77 added, rules removed.
+	* m_init.c: SCF vectors and overlap removed for now, renamed
+	molcassetup to m_setup
+	* molcas.h: Likewise..
+	
+	* configure.ac: Added.
+	* Makefile, Makefile.in: Replaced.
+	* molcas.h: Use wrappers for FORTRAN subroutines.
+	* m_init.c: Likewise.
+	
+2002-01-24  Alexander Thiel  <stderr@web.de>
+
+	* ixset.c: Many bugfixes.
+	* molcas2.f90: Mixed up nBas and nOrb, fixed.
+	* molcas.h: Changed according to changes in API specs.
+	* m_init.c: TwoE[0] unused now.
+	* Makefile: Lots of temporary changes, will be removed later.
+
+2002-01-20  Alexander Thiel  <stderr@web.de>
+
+	* molcas1.f90: Map orbital energies into active space. Does no longer
+	take nOrb as a parameter, passes a return value instead. 
+	
+	* molcas_setup.f90: Active orbitals were not numbered sequentially, 
+	fixed.
+
+2002-01-08  Alexander Thiel  <stderr@web.de>
+
+	* epsi_molcas.f: Removed.
+	* molcas.h: Made TwoE local to the molcas package for now.
+	* m_init.c: Use new interface names.
+
+2002-01-07  Alexander Thiel  <stderr@web.de>
+
+	* molcas.h: Reformatted using indent.
+	* m_init.c: Likewise.
+	* ixset.c: Likewise.
+
+2002-01-05  Alexander Thiel  <stderr@web.de>
+
+	* molcas_setup.f90: Fixed missing initialization. Can now be called several times.
+	* m_init.c: Likewise.
+	
+2001-12-25  Alexander Thiel  <stderr@web.de>
+
+	* molcas.h (molcas0): nSym added.
+	* m_init.c: Likewise.
+	* molcas.f90: Likewise.
+	
+	* molcas6.f90: Spurious reshape removed.
+
+	* molcas7.f90: Added; implements overlap matrix.
+	* m_init.c: Updated accordingly.
+	* molcas.h: Likewise.
+	* Makefile: Likewise.
+
+2001-12-19  Alexander Thiel  <stderr@web.de>
+
+	* molcas1.f90: Use m_aux.
+	* m_aux.f90: PickBlock added.
+
+	* molcas3.f90: Bugs fixed.
+
+	* molcas6.f90: Added; implements SCF vectors.
+	* Makefile: Changed accordingly.
+	* m_init.f90: Likewise.
+	* molcas.h: Likewise.
+	
+2001-12-18  Alexander Thiel  <stderr@web.de>
+
+	* ixset.c: Added; contains stuff for 2e integral lookup.
+	* m_aux.f90: Added; contains some helper routines and data
+	global to this backend.
+	* molcas_setup.f90: Added; initializes the data in m_aux.
+	* molcas.h: Added; contains the prototypes of this backend.
+	* molcas0.f90: Added; implements the info function.
+	* molcas1.f90: Added; implements orbital energies.
+	* molcas2.f90: Added; implements symmetry labels.
+	* molcas3.f90: Added; implements occupation numbers.
+	* molcas5.f90: Added; implements the nextint functionality.
+	* m_init.c: Changed according to the new features above.
+	* Makefile: Likewise.

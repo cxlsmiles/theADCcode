@@ -1,0 +1,22 @@
+Short and very sketchy overview of the concept:
+
+The library provides a generic interface to data provided by the various
+ab initio packages around.
+This is simply achieved by calling a backend function that implements a
+certain capability, such as returning orbital energies, for a given
+package. To ensure that the frontend (interface) works in a generic way,
+it is crucial that the backend functions conform to the specification 
+given elsewhere.
+Technically, the interface boils down to setting pointers to the appropriate
+functions. The specification is the harder part...
+
+
+What you need to do to hook a new module (backend):
+
+* provide the functions implementing the capabilites
+* provide an init function that sets the pointers
+* define the module ID in phis.h
+* add an entry for the init function to the hooks array in init.c
+
+That's it.
+

@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+#####################################
+# RUN GAMESS-US
+#
+  mol=Li
+
+
+  rm -rf /home/yasen/scr/*
+
+  runrhf ${mol} ${mol}.out
+  wait
+  cat ${mol}.out
+  rm -f ${mol}.out
+
+
+#
+#
+#############################################################################
+#
+# ADC DIP calculation
+
+$PWD/../../../theADCcode << EOF
+&frontend
+gus
+&propagator
+spin 1; adc2dip; sym 1 ;
+&diagonalizer
+full
+#iter 100
+#roots 1..220
+&eigen
+ps 0.002
+thresh 0.01
+&cap
+full; boxy 4 ; boxz 4; boxx 4
+nicap 100
+sicap 0.002
+incr exp
+srcap 0.
+eadcmin 0.0
+eadcmax 300.0
+output test.dat
+EOF
+echo "%CAP trajectories:"
+cat test.dat
+# Clean up the mess
+rm -f capint.txt HForbenergy.txt moint.dat  orbital1.txt\
+ orbital4.txt  orbital.txt  soint.txt dipAO.txt fort.555  mocoef.txt\
+ moint.txt  orbital2.txt  orbital.tmp   overlap.txt  xyz.txt\
+ capmat.dat  fort.16  fort.17  fort.86  mosmat.dat  test.dat

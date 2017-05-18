@@ -1,0 +1,33 @@
+PHIS-12.0.0:      
+	    Support Molcas v6. 
+
+PHIS-0.7.3:
+	    Minor bugfixes and cleanups.
+
+PHIS-0.7.2:
+   	    Fixed problem in the molcas module for linear dependencies in the
+	    basis.
+
+PHIS-0.7.1:
+   	    The molcas module now permits to have overlaps and SCF vectors
+	    without transformation.
+
+PHIS-0.7.0: 
+	    Now provides some info about frozen orbitals.
+	    Handles rectangular matrices of SCF vectors.
+	    Code for overlap and SCF vectors much more stable.
+	    Lots o' bugfixes.
+
+PHIS-0.6.0: First release with revised API definitions.
+
+PHIS-0.5.1: SCF vectors and overlap functions for the GUK backend added.
+            Note that the final format for this is not yet fixed.
+            Some portablity changes: at least it compiles on DEC now...
+
+PHIS-0.5.0: Backwards imcompatible changes to some interface calls.
+            Support for SCF vectors and overlap added to MOLCAS backend.
+
+PHIS-0.4.1: Support for SCF vectors and overlap added to the GUK module.
+
+PHIS-0.4.0: MP2 is working for MOLCAS and GUK backends.
+

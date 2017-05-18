@@ -1,0 +1,60 @@
+basis
+#  aug-cc-pVDZ  EMSL  Basis Set Exchange Library  9/16/10 5:15 AM
+# Elements                             References
+# --------                             ----------
+# H     : T.H. Dunning, Jr. J. Chem. Phys. 90, 1007 (1989).
+# He    : D.E. Woon and T.H. Dunning, Jr. J. Chem. Phys. 100, 2975 (1994).
+# Li - Ne: T.H. Dunning, Jr. J. Chem. Phys. 90, 1007 (1989).
+# Na - Mg: D.E. Woon and T.H. Dunning, Jr.  (to be published)
+# Al - Ar: D.E. Woon and T.H. Dunning, Jr.  J. Chem. Phys. 98, 1358 (1993).
+# Ca     : J. Koput and K.A. Peterson, J. Phys. Chem. A, 106, 9595 (2002).
+# 
+
+
+# Elements                             References
+# --------                             ---------
+#  H    :  T.H. Dunning, Jr. J. Chem. Phys. 90, 1007 (1989).
+#  He   :  D.E. Woon and T.H. Dunning, Jr., J. Chem. Phys. 100, 2975 (1994).
+#  B - F:  R.A. Kendall, T.H. Dunning, Jr. and R.J. Harrison, J. Chem. Phys. 96,
+#          6796 (1992).
+# Al - Cl: D.E. Woon and T.H. Dunning, Jr. J. Chem. Phys. 98, 1358 (1993).
+#   
+
+
+
+# NEON
+S   Ne
+      0.0007380          17880.0000000        
+      0.0056770           2683.0000000        
+      0.0288830            611.5000000        
+      0.1085400            173.5000000        
+      0.2909070             56.6400000        
+      0.4483240             20.4200000        
+      0.2580260              7.8100000        
+      0.0150630              1.6530000        
+S   Ne
+     -0.0001720          17880.0000000        
+     -0.0013570           2683.0000000        
+     -0.0067370            611.5000000        
+     -0.0276630            173.5000000        
+     -0.0762080             56.6400000        
+     -0.1752270             20.4200000        
+     -0.1070380              7.8100000        
+      0.5670500              1.6530000        
+S   Ne
+      1.0000000              0.4869000        
+S   Ne
+      1.0000000              0.1230000        
+P   Ne
+      0.0460870             28.3900000        
+      0.2401810              6.2700000        
+      0.5087440              1.6950000        
+P   Ne
+      1.0000000              0.4317000        
+P   Ne
+      1.0000000              0.1064000        
+D   Ne
+      1.0000000              2.2020000        
+D   Ne
+      1.0000000              0.6310000        
+end

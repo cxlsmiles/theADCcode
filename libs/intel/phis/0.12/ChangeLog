@@ -1,0 +1,502 @@
+2006-08-10  Vitja Vysotskiy  <vitjapohen@ngs.ru>
+
+	* Added compabilities to MOLCAS v6.*
+	* configure.ac was adapted for x86_64 architecture	
+
+2004-12-06  Alex Thiel  <stderr@web.de>
+
+	Patch 0.10.1
+	Adds infrastructure for the one-electron integrals to the
+	front-end and implements it for the Molcas backend.
+	
+	* SPEC: Description for phis_get_quad() and phis_get_oneel()
+	added.
+	* examples/dump_add.c: Print one-electron integrals if available.
+	* phis/init.c: New front-end stub for one-electron integrals.
+	* include/phis.h: Changed accordingly.
+
+	See molcas/ChangeLog for back-end specific changes.
+	TODO: implement for the GUK back-end.	
+
+2004-06-18  Alex Thiel  <stderr@web.de>
+
+	Patch 0.9.2
+	Reactivate overlaps.
+	
+2004-06-17  Alex Thiel  <stderr@web.de>
+
+	Patch 0.9.1
+	Adds infrastructure for quadrupole integrals to the front-end and
+	implements them for the Molcas backend.
+
+	* examples/dump_all.c: Print the quadrupol integrals if available.
+	* phis/init.c: New front-end stub for the quadrupol integrals.
+	* phis.h.in: Changed accordingly.
+
+	See molcas/ChangeLog for back-end specific changes.
+	TODO: update the specs, implement for the GUK back-end.
+	
+2004-05-05  Alex Thiel  <stderr@web.de>
+
+	Patch 0.8.3
+	Molcas one-electron transformation: bugfixes.
+	See molcas/ChangeLog for details.
+	
+2004-04-05  Alex Thiel  <stderr@web.de>
+
+	Patch 0.8.2
+	Fix transformation of one-electron matrices in the Molcas backend.
+	See molcas/ChangeLog for details.
+	
+2004-04-02  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.8.1
+	Dipol integrals in velocity form.
+
+	* phis/init.c (phis_get_vel): New function.
+	* include/phis.h.in (HAVE_VEL): New flag.
+	(phis_get_vel): Prototype added and hooked into the interface
+	structure.
+	* SPEC: phis_get_vel added.
+	* configure.ac: New minor revision due to this new feature.
+	* examples/dump_all.c: Print out the dipol integrals in velocity
+	form if present.
+	Return with an explicit 0 at the end of normal execution.
+
+2004-03-31  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.7.103
+	Implement dipol integrals for the GUK backend. See guk/ChangeLog
+	for details.
+
+	* configure.ac: Patchlevel updated.
+	Made PERL available as a command line option.
+	Added IEEE flags on DEC machines (should I check for the CPU instead?).
+	Some cosmetic changes to the code layout.
+	
+2004-03-26  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.7.102
+	Script and Makefile clean-up. 
+
+	* configure.ac: Check for Perl added. Patchlevel updated.
+	* Makefile.in: Target "test" added.
+	Plus some minor changes for the clean targets.
+	* examples/Makefile.in (test): New (empty) target.
+	* phis/Makefile.in (test): Likewise.
+	Added dependencies on header files where appropriate.
+	
+2004-03-25  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.7.101
+	Fix dipol integrals in the Molcas backend. See molcas/ChangeLog
+	for details.
+
+	* configure.ac (AC_INIT): Patchlevel updated.
+
+2004-03-22  Alexander Thiel  <stderr@web.de>
+
+	Patch 0.7.100
+	NOTE: Boosted the version to 0.7.100 as too much has changed since 0.7.3
+	      *Every* patch should increase the patch level from now on.
+
+	This patch streamlines the configuration for the PHIS library. I have
+	moved the backend-specific configurations into the top-level
+	configure.ac. 
+	Also, I fixed the version info of the library. The one and only place 
+	to specify the version is now the AC_INIT macro at the top of 
+	configure.ac!
+	phis.h no longer includes config.h which contains local compile
+	time information for the library that should not leak to the 
+	application.
+	* configure.ac (AC_INIT): Updated to the newer autoconf conventions.
+	Included backend-specific configurations, adding the correspondig
+	files to ac_output.
+	Make configure generate include/phis.h.
+	Use awk to extract (MAJOR,MINOR,PATCH) from the version string.
+	Some cosmetic formatting changes.
+	* .version: Removed.
+	* include/phis.h.in: Replaces phis.h. The F77 wrappers are now defined 
+	here also. Removed inclusion of config.h.
+	* phis/version.c: Include config.h explicitly.
+	* phis/init.c: Likewise.
+	* phis/Vpqrs.c: Likewise.
+	
+2004-03-16  Alexander Thiel  <stderr@web.de>
+
+	This patch adds a local copy of the BLAS general purpose matrix
+	multiplication routine (dgemm). Detailed changes:
+	* phis/blas: New directory.
+	* phis/blas/dgemm.f: New file. Obtained from www.netlib.org.
+	* phis/blas/lsame.f: Likewise.
+	* phis/blas/xerbla.f : Likewise.
+	* phis/Makfile.in: Added these files to libphis.a.
+	* include/phis.h: Prototype and F77 wrapper added for dgemm.
+	
+2004-03-10  Alexander Thiel  <stderr@web.de>
+
+	This patch removes the functionality to display orbtials that
+	were not active in the MO transformation. If you care about these
+	orbitals why would you freeze/delete then in the first place?
+	Detailed changes:
+	* include/phis.h (SHOW_INACTIVE): Renamed to FLAG_RSVD1.
+	* phis/init.c: Emit a warning if FLAG_RSVD1 is set and terminate.
+	* SPEC: Changed accordingly.
+	* examples/dump_all.c: Removed the -a option. 
+
+2003-24-11  Alexander Thiel  <stderr@web.de>
+
+	* examples/scm-sample.scm: New file.
+	
+2003-09-09  Alexander Thiel  <stderr@web.de>
+
+	* phis/Vpqrs.c: Stray debugging code removed.
+
+2003-09-08  Alexander Thiel  <stderr@web.de>
+
+	* phis/Vpqrs.c: Code added to debug requests of non-symmetric
+	integrals.
+	* SPEC: Added a note about non-symmetric integrals.
+
+2003-06-24  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* stub/: New dummy backend.
+	* include/phis.h: STUB defined.
+	* phis/init.c: init hook added for dummy backend.
+	* configure.ac: Added configure options for stub.
+
+2003-06-04  Joerg Breidbach  <joergb@tc.pci.uni-heidelberg.de>
+
+	* phis/init.c (phis_get_geometry): phis_get_geometry now returns
+	the (sometimes needed) nuclear charges 
+	* SPEC: Likewise
+	* include/phis.h: Likewise
+	* examples/dump_all.c (main): Likewise
+
+2003-04-24  Joerg Breidbach  <joergb@schlappi>
+
+	* configure.ac: the GUK backend now determines all the needed
+	parameters (MAXORB,MXSHEL,...) dynamically 
+	* examples/dump_all.c (print_matrix): fixed bug in layout
+	(main): just first integral was printed: fixed
+
+2003-04-15  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* SPEC: Changed numbering of irreps, new layout.
+
+2003-03-26  Alexander Thiel  <stderr@web.de>
+
+	* phis/init.c (phis_get_dip): Generic interface for the dipole
+	matrix added.
+	* include/phis.h: Corresponding capability flag, prototype and
+	hook.
+	* SPEC (phis_get_dip): Short description added, fixed some 
+	spelling errors.
+	* examples/dump_all.c: Added code to dump the dipole integrals
+	if present.
+	
+2003-02-07  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* examples/dump_all.c: Replaced some pointers that are not
+	referenced with NULL pointers for clarity.
+
+2002-12-02  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* include/phis.h (SYM_BLOCKED): New flag.
+	* SPEC (phis_init): Documented the SYM_BLOCKED flag.
+	* examples/dump_all.c: New option -s for symmetry blocking.
+	
+	* configure.ac: Check for MA library (Molcas memory manager) added. 
+	The new interface to seward needs it.
+	* examples/Makefile.in (LDFLAGS): Let configure handle this.
+	* examples/dump_all.c: Fixed minor bug in geometry part.
+
+2002-11-16  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* configure.ac: AC_C_INLINE added.
+	* phis/Vpqrs.c (canonicalize): Optimized.
+
+	* phis/Vpqrs.c (Vordered): New function.
+	* include/phis.h: Likewise.
+	* SPEC: Documentation for Vordered().
+
+2002-11-15  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* examples/dump_all.c: Geometry implemented 
+
+2002-09-16  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* .version (PATCH): Updated for Release 0.7.3
+	* NEWS: Likewise.
+	
+	* configure.ac (CFLAGS): If debugging is requested and we use gcc, 
+	do not use -O2 and add -Wall.
+
+	* include/phis.h (malloc_we): prototype added. 
+	* examples/sample.c: Fixed uninitialized arrays.
+
+2002-05-08  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* .version (PATCH): Updated for Release 0.7.2
+	* NEWS: Likewise.
+
+2002-05-02  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* NEWS: Updated for Release 0.7.1
+
+2002-04-30  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* include/phis.h (ACTIVE_ONLY): Renamed to more appropriate 
+	SHOW_INACTIVE. 
+	* examples/dunp_all.c: Likewise.
+	
+2002-04-22  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* NEWS: Updated for Release 0.7.0
+	* .version: Likewise.
+
+2002-04-21  Alexander Thiel  <stderr@web.de>
+
+	* configure.ac (--enable-debug): -DDEBUG and -lefence added. 
+	
+	
+2002-04-12  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* SPEC: Documentation for phis_init added.
+	* include/phis.h (ACTIVE_ONLY): New flag.
+	* phis/init.c: Modified to accept flags in the high bytes.
+	* examples/dump_all.c: List of active orbitals implemented.
+	
+2002-04-09  Alexander Thiel  <stderr@web.de>
+
+	* SPEC (phis_list_active): New function.
+	* include/phis.h: Updated accordingly.
+	* phis/phis.c: Likewise.
+
+2002-04-04  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* SPEC (phis_get_scfvec): phis_get_scfvec always returns the
+	number of active orbitals and the number of basis functions
+	* examples/dump_all.c (main): Changed according to latest changes
+	in phis_guk_scfvec and SPEC
+
+2002-03-25  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* examples/fsample.f: Updated to work with versions > 0.5
+	* examples/sample.c: Comments, minor changes. 
+	* examples/dump_all.c (print_matrix): Fixed problem with
+	rectangular matrices.
+	Fixed cases where nBas != number of AOs
+
+2002-03-24  Joerg Breidbach  <joergb@pci.uni-heidelberg.de>
+
+	* examples/dump_all.c: New file.
+	* examples/fdump_all.f: New file.
+	* examples/Makefile.in: New files added.
+
+	* phis/util.c: New file.
+	* phis/Makefile.in: New files added.
+	
+2002-03-24  Alexander Thiel  <stderr@web.de>
+
+	* SPEC (guk_get_scfvec): Added length of SCF vectors as a return value.
+	* include/phis.h: Likewise.
+	* phis/init.c: Likewise.
+
+2002-03-14  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* NEWS: Updated for Release 0.6.0.
+
+	* examples/sample.c: Cleaned up some comments. 
+
+	* configure.ac: Changed default for backend support: you now have
+	to enable the backend explicitly.
+
+2002-03-14  Joerg Breidbach  <joergb@einstein.pci.uni-heidelberg.de>
+
+	* phis/init.c (phis_get_ao): New function.
+	* include/phis.h (HAVE_AO): New flag.
+	(phis_get_ao): New function added.
+	
+2002-03-13  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis/Vpqrs.c (phis_load_Vpqrs): Fixed call to phis_get_sym.
+
+	* .version: Increased minor number to 6.
+	* examples/sample.c: Updated to use this new version.
+	* examples/fsample.f: Version 0.6 support not yet implemented,
+	check version and abort.
+
+2002-03-12  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* SPEC: The routines now take a maximum value of elements the caller can
+	handle and return the actual number, thus reducing overhead if the routine
+	only cares about some selected properties of the SCF calculation.
+	
+	* include/phis.h: (ixset): Now local to Vpqrs.c.
+	(canonicalize): Likewise.
+	Changed according to latest changes in the specs.
+	* phis/init.c (phis_init): Likewise.
+
+	* phis/ixset.c: Removed file.
+	* phis/Vpqrs.c (ixset): Function added.
+	(canonicalize): Function added.
+	(fill_TwoE): Renamed to phis_load_Vpqrs.
+
+	* NEWS: Updated for Release 0.5.1
+	* .version: Likewise.
+
+	* configure.ac (CFLAGS): Made more DEC friendly changes: removed -I../include
+	* examples/Makefile.in (FLIBS): Now handled by configure.
+	(CFLAGS): -I../include
+	* phis/Makefile.in (CFLAGS): Likewise.
+	
+	
+2002-03-01  Alexander Thiel  <stderr@web.de>
+
+	* include/phis.h (phis_version): F77 macro defined
+
+2002-03-01  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* NEWS: Updated for Release 0.5.0
+
+	* .version: New file.
+	* configure.ac: Version information added.
+	* phis/version.c: New file.
+	* phis/Makefile.in (OBJS): version.o added.
+	* include/phis.h: Updated accordingly.
+
+2002-03-01  Alexander Thiel  <stderr@web.de>
+
+	* examples/Makefile.in (FFLAGS): Flags for Absoft libraries removed.
+
+	* SPEC: Sync'd names with phis.h
+	(phis_get_info): nAtoms added.
+	(phis_get_epsi): E_hf added.
+	(phis_get_geometry): New function.
+	* include/phis.h: Changed accordingly.
+	* phis/init.c (phis_get_info): Likewise.
+	* examples/sample.c: Likewise.
+	* examples/fsample.f: Likewise.
+
+2002-02-14  Alexander Thiel  <stderr@web.de>
+
+	* NEWS: Updated for Version 0.4.1
+
+2002-02-11  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* NEWS: New file.
+
+2002-02-11  Alexander Thiel  <stderr@web.de>
+
+	* examples/sample.c: Added option to select backend.
+	Renamed vint to Vpqrs.
+	* examples/fsample.f: Likewise.
+
+	* include/phis.h (interface.vint): Removed.
+	(vint): Renamed to...
+	(Vpqrs): ...this.
+	(ixset): New function.
+	(canonicalize): Likewise.
+	(fill_TwoE): Likewise.
+	(phis_get_scfvec): Likewise.
+	(phis_get_overlap): Likewise.
+
+	* phis/ixset.c: Added.
+	* phis/Vpqrs.c: Likewise.
+	* phis/Makefile.in: Updated accordingly.
+	* phis/init.c (phis_init): guk_init_hook added.
+	Renamed some interface routines.
+
+	* configure.ac: New option --with-guk.
+	* cvs.mk: GUK stuff included.
+	
+2002-02-06  Alexander Thiel  <stderr@web.de>
+
+	* phis/ixset.c: Moved here from molcas package.
+	* phis/Makefile.in: Updated accordingly.
+	
+2002-02-06  Alexander Thiel  <stderr@web.de>
+
+	* configure.ac: Options for GUK added.
+	* guk: Directory added.
+	* cvs.mk: GUK stuff added.
+
+2002-01-28  Alexander Thiel  <Alexander.Thiel@tc.pci.uni-heidelberg.de>
+
+	* phis/init.c (phis_init): Calling semantics changed, obsoletes finit.
+	* include/phis.h: Updated accordingly.
+	* examples/fsample.f: Likewise.
+	* examples/sample.c: Likewise.
+
+	* include/clenup.mk: Added; helper rules for cleanup.
+	* phis/Makefile, phis/Makefile.in: Replaced, cleanup added.
+	* examples/Makefile.in: Likewise.
+	* Makefile.in: Cleanip fixed.
+	
+	* cvs.mk: autoheader did not work; fixed.
+
+	* configure.ac: Made --without-molcas work.
+
+2002-01-29  Alexander Thiel  <stderr@web.de>
+
+	* cvs.mk: Added; simple script to prepare configuration.
+
+2002-01-26  Alexander Thiel  <stderr@web.de>
+
+	* config.guess, config.sub, install-sh: Added.
+	* configure.ac: Added.
+	* Makefile.in, Makefile: Replaced.
+	* examples/Makefile.in, examples/Makefile: Likewise.
+	* include/phis.h: Includes config.h, uses F77 wrappers.
+	* phis/init.c: Likewise.
+
+2002-01-24  Alexander Thiel  <stderr@web.de>
+
+	* SPEC: Added a raw decription for all functions.
+	* examples/sample.c: Made this a realistic example.
+	* examples/fsample.f: Likewise.
+
+	* examples/Makefile: Lots of temporary stuff added. Will be removed
+	when a true configure scrpt is added.
+	* phis/Makefile: Likewise.
+
+	* phis/init.c: const attribute for args of vint.
+	* include/phis.h: Likewise.
+	
+2002-01-20  Alexander Thiel  <stderr@web.de>
+
+	* include/phis.h: Changed API for phis_get_epsi.
+	* phis/init.c: Likewise. 
+	
+2002-01-07  Alexander Thiel  <stderr@web.de>
+
+	* include/phis.h: Reformatted using indent.
+	* src/init.c: Likewise.
+	* src/finit.c: Likewise.
+
+2001-12-25  Alexander Thiel  <stderr@web.de>
+
+	* SPEC: SCF vectors added. 
+	Specs for info functionality changed to include no of irreps.
+	* include/phis.h (info): Changed accordingly.
+	* phis/init.c: Likewise. 
+	
+2001-12-24  Alexander Thiel  <stderr@web.de>
+
+	* SPEC: Overlap added.
+	* include/phis.h: Likewise.
+	* phis/init.c: Likewise.
+	
+2001-12-19  Alexander Thiel  <stderr@web.de>
+
+	* include/phis.h: Fixed capability numbering. SCF vectors added.
+	* phis/init.c: SCF vectors added.	
+
+2001-12-18  Alexander Thiel  <stderr@web.de>
+
+	* SPEC: Some raw notes added, this really must be rewritten.
+	* phis/init.c: Much functionality added; multiplication table
+	added. This file is subject to some radical changes.
+	* include/phis.h: Likewise.
+

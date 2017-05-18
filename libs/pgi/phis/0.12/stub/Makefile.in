@@ -1,0 +1,22 @@
+CC       = @CC@
+CFLAGS   = -I../include @CFLAGS@
+
+CPP      = @CPP@
+CPPFLAGS = @CPPFLAGS@
+
+LDFLAGS  = @LDFLAGS@
+LIBS     = @LIBS@
+
+RM       = @RM@
+
+# dependencies
+OBJS= ../lib/libphis.a(phis_stub_init.o)
+
+cleanfiles     = *.o *~
+realcleanfiles = Makefile
+distcleanfiles = 
+
+# actions
+all: $(OBJS)
+
+include ../include/cleanup.mk

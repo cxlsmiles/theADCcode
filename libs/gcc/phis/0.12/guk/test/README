@@ -1,0 +1,13 @@
+expected values:
+
+H20/MP2, 6-31G*, cartesian d functions, all orbitals active 
+mp2 correlation energy         -0.18796257
+
+H20/MP2, 6-31G*, spherical d functions, all orbitals active 
+mp2 correlation energy
+
+H20/MP2, 6-31G*, cartesian d functions, orbitals 2 to 18 active: 
+mp2 correlation energy         -0.16721332
+
+H20/MP2, 6-31G*, spherical d functions, orbitals 2 to 18 active: 
+mp2 correlation energy         -0.17536075

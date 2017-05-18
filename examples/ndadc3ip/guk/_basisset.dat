@@ -1,0 +1,64 @@
+basis
+#  aug-cc-pVDZ  EMSL  Basis Set Exchange Library  6/14/10 5:15 AM
+# Elements                             References
+# --------                             ----------
+# H     : T.H. Dunning, Jr. J. Chem. Phys. 90, 1007 (1989).
+# He    : D.E. Woon and T.H. Dunning, Jr. J. Chem. Phys. 100, 2975 (1994).
+# Li - Ne: T.H. Dunning, Jr. J. Chem. Phys. 90, 1007 (1989).
+# Na - Mg: D.E. Woon and T.H. Dunning, Jr.  (to be published)
+# Al - Ar: D.E. Woon and T.H. Dunning, Jr.  J. Chem. Phys. 98, 1358 (1993).
+# Ca     : J. Koput and K.A. Peterson, J. Phys. Chem. A, 106, 9595 (2002).
+# 
+
+
+# Elements                             References
+# --------                             ---------
+#  H    :  T.H. Dunning, Jr. J. Chem. Phys. 90, 1007 (1989).
+#  He   :  D.E. Woon and T.H. Dunning, Jr., J. Chem. Phys. 100, 2975 (1994).
+#  B - F:  R.A. Kendall, T.H. Dunning, Jr. and R.J. Harrison, J. Chem. Phys. 96,
+#          6796 (1992).
+# Al - Cl: D.E. Woon and T.H. Dunning, Jr. J. Chem. Phys. 98, 1358 (1993).
+#   
+
+
+
+# NITROGEN
+S   N
+      0.0007000           9046.0000000        
+      0.0053890           1357.0000000        
+      0.0274060            309.3000000        
+      0.1032070             87.7300000        
+      0.2787230             28.5600000        
+      0.4485400             10.2100000        
+      0.2782380              3.8380000        
+      0.0154400              0.7466000        
+     -0.0028640              0.2248000        
+S   N
+     -0.0001530           9046.0000000        
+     -0.0012080           1357.0000000        
+     -0.0059920            309.3000000        
+     -0.0245440             87.7300000        
+     -0.0674590             28.5600000        
+     -0.1580780             10.2100000        
+     -0.1218310              3.8380000        
+      0.5490030              0.7466000        
+      0.5788150              0.2248000        
+S   N
+      1.0000000              0.2248000        
+S   N
+      1.0000000              0.0612400        
+P   N
+      0.0399190             13.5500000        
+      0.2171690              2.9170000        
+      0.5103190              0.7973000        
+      0.4622140              0.2185000        
+P   N
+      1.0000000              0.2185000        
+P   N
+      1.0000000              0.0561100        
+D   N
+      1.0000000              0.8170000        
+D   N
+      1.0000000              0.2300000        
+
+end

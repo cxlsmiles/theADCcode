@@ -1,0 +1,23 @@
+/getpara.pl/1.4/Thu Mar 14 17:37:56 2002//
+/phis_guk_ao.c/1.5/Wed Mar  3 11:41:46 2004//
+/phis_guk_info.c/1.8/Thu Mar 11 11:19:36 2004//
+/phis_guk_loa.c/1.3/Thu Mar 11 11:19:36 2004//
+/phis_guk_nextint.c/1.4/Thu Mar 14 17:53:26 2002//
+/phis_guk_occ.c/1.6/Thu Mar 11 11:19:36 2004//
+/phis_guk_sym.c/1.9/Thu Mar 11 11:19:36 2004//
+/sort_gukscf.c/1.4/Thu Apr 24 14:05:49 2003//
+/typedefs.h/1.4/Thu Apr 24 14:05:49 2003//
+/typeinits.c/1.2/Tue Mar  2 16:34:34 2004//
+D/test////
+D/tools////
+/ChangeLog/1.32/Fri Apr  2 20:13:31 2004//
+/Makefile.in/1.10/Fri Apr  2 20:13:31 2004//
+/guk.h/1.13/Fri Apr  2 20:13:31 2004//
+/guk_aux.c/1.9/Fri Apr  2 20:13:31 2004//
+/guk_init.c/1.20/Fri Apr  2 20:13:31 2004//
+/guk_read_type2.c/1.1/Wed Mar 31 09:02:19 2004//
+/phis_guk_dip.c/1.1/Wed Mar 31 09:02:19 2004//
+/phis_guk_epsi.c/1.7/Fri Apr  2 20:13:31 2004//
+/phis_guk_geometry.c/1.6/Fri Apr  2 20:13:31 2004//
+/phis_guk_overlap.c/1.10/Fri Apr  2 20:13:31 2004//
+/phis_guk_scfvec.c/1.11/Fri Apr  2 20:13:31 2004//

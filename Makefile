@@ -1,0 +1,154 @@
+# The makefile needs serious improvment. 
+# Choose a toolset; available : intel, pgi, gcc
+TOOLSET = intel
+#TOOLSET = pgi
+#TOOLSET = gcc
+
+# Flags determining which backends are supported.
+# Comment the unwanted. 
+# TODO : find a better way to do this.
+MOLC = -DMOLC
+GUS = -DGUS
+GUK = -DGUK
+
+#ifdef MOLC
+#MACROS += $(MOLC) 
+#endif
+#ifdef GUK
+#MACROS += $(GUK) 
+#endif
+ifdef GUS
+MACROS += $(GUS) 
+endif
+
+
+
+# Initialize flags and variables according to the chosen toolset
+ifeq ($(TOOLSET),pgi)	#Portland
+  FC  = pgf90
+  CC  = pgcc
+  CPP = pgCC 
+  MACROS += -DPGI
+  CPPFLAGS = -gopt -Mchkstk # -fastsse -tp k8-64 #-Mipa=fast,inline
+  CFLAGS   = -g #-fastsse -tp k8-64 #-Mipa=fast,inline
+  FFLAGS   = -g -C -traceback #-fastsse -tp k8-64  #-Mipa=fast,inline
+  OPENMP   = -mp 
+  INC_LAPACK = -I/cvos/shared/apps/acml/4.2.0/pgi64/include 
+  LIB_LAPACK = -L/cvos/shared/apps/acml/4.2.0/pgi64/lib -lacml -lacml_mv
+  LIB_COMP   = -L/cvos/shared/TC/pgi/10.9/linux86-64/10.9/libso/  -lpgftnrtl  -pgf90libs -lm
+endif
+ifeq ($(TOOLSET),intel) #Intel
+  FC  = ifort
+  CC  = icc
+  CPP = icpc 
+  MACROS += -DINTEL
+  CPPFLAGS = -g -C -traceback #-O3  -axS -ipo -Mipa=fast,inline
+  CFLAGS   = -g -C -traceback #-O3  -axS -ipo -Mipa=fast,inline
+  FFLAGS   = -g -C -traceback #-O3  -axS -ipo -Mipa=fast,inline
+  LDFLAGS  = -shared-intel
+  OPENMP   = -qopenmp 
+  INC_LAPACK = -I/opt/intel/compilers_and_libraries_2017.1.132/linux/mkl/include/
+  LIB_LAPACK = -L/opt/intel/compilers_and_libraries_2017.1.132/linux/mkl/lib/intel64_lin/ \
+             -lmkl_intel_lp64  -lmkl_sequential -lmkl_core 
+  LIB_COMP   = -L/opt/intel/compilers_and_libraries_2017.1.132/linux/compiler/lib/intel64_lin/ -lifcore -limf 
+endif
+ifeq ($(TOOLSET),gcc) #GCC
+  FC  = gfortran
+  CC  = gcc
+  CPP = g++ 
+  MACROS += -DGCC
+  CPPFLAGS = -g 
+  CFLAGS   = -g 
+  FFLAGS   = -g 
+  OPENMP   = -fopenmp
+  INC_LAPACK =   
+  LIB_LAPACK = -L/cvos/shared/apps/blas/gcc/1/lib64 -L/cvos/shared/apps/lapack/gcc/64/3.2 -llapack -lblas
+  LIB_COMP   = -L/cvos/shared/apps/gcc/4.3.2/lib64 -lgfortran
+endif
+
+INC_DIR = -I$(ROOT_DIR) \
+	            -I/home/common/boost/boost_1_53_0/ $(INC_LAPACK)
+
+LIB_BOOST = -L/home/common/boost/boost_1_53_0/stage/lib -lboost_regex
+
+# Only intel compiled molcas phis abavialble.
+# To link ifort code with g++/pgi use -ldl (don't ask why)
+#MOLCAS_LIB =  /cvos/shared/TC/phis/molcas/74.ifc/lib/libphis.a \
+#             -L/cvos/shared/TC/molcas/serial/molcas74.ifc/lib -lmolcas \
+#             /cvos/shared/TC/molcas/serial/molcas74.ifc/g/lib/LINUX64/libma.a \
+#             -L/cvos/shared/apps/intel/Compiler/11.1.046/lib/intel64/ -lifcore -limf  -ldl
+#GUK_LIB = $(ROOT_DIR)/libs/$(TOOLSET)/phis/0.12/lib/libphis_guk.a
+
+LIB =  $(LIB_LAPACK) $(LIB_BOOST) $(LIB_COMP)
+
+#ifdef MOLC
+#LIB += $(MOLCAS_LIB)
+#INC_DIR +=  -I$(ROOT_DIR)/libs/$(TOOLSET)/phis/0.12/include/
+#endif
+#ifdef GUK
+#LIB += $(GUK_LIB)
+#INC_DIR +=  -I$(ROOT_DIR)/libs/$(TOOLSET)/phis/0.12/include/
+#endif
+
+CPPFLAGS += $(MACROS)
+
+BIN = theADCcode
+export FC CC CPP CPPFLAGS CFLAGS FFLAGS OPENMP
+ROOT_DIR = $(CURDIR)
+SUBDIRS =  Lanczos  adc2_dip adc2_prop ndadc3_prop adc2_pol ndadc3_ip scf_data subspaceCAP analysis
+LS_OBJS = $(addsuffix /*.o, . $(SUBDIRS))
+
+export INC_DIR
+
+SCFDATA_OBJS = scf_data_reader.o phis_guk.o phis_molcas.o gus_reader.o \
+		cap_Sajeev.o r2capmat.o dgamma_.o  gauss2_.o  intgauss_.o  polmulti_.o  poltrans_.o
+		
+
+ROOTDIR_OBJS = blas_matrix.o adc_selector.o input_data.o\
+               integral_table.o main.o  
+               
+LANCZOS_OBJS = lanczos_util.o bnd2td.o tddiag.o
+ADC2_PROP_OBJS = adc2_cap_matrix.o zeroth_order.o first_order.o second_order.o\
+		zeroth_order_triplet.o first_order_triplet.o second_order_triplet.o 
+
+ADC2_OBJS = adc2_dip_blocks.o  adc2_matrix.o singlet.o  triplet.o 
+NDADC3_IP_OBJS =  nd_adc3_matrix.o make_symtab.o calc_dim_2h1p.o calc_k1.o calc_c11_2.o calc_c11_3.o\
+               calc_c12_1.o calc_c12_2.o calc_c22_1_off.o calc_k2.o calc_c22_1_dia.o self_energy.o id_self_energy.o 
+               
+NDADC3_PROP_OBJS = nd_adc3_cap_matrix.o my_calc_d11.o  my_calc_d12.o my_calc_d22_off.o my_calc_d22_diag.o calc_d_null_null.o my_calc_d_null.o 
+
+ADC2_POL_OBJS = constants.o parameters.o adc2_pol_adapter.o misc.o adc_ph.o select_fano.o filetools.o  get_matrix.o adc2_pol_matrix.o 
+
+
+SUBSPACECAP_OBJS = test.o input.o config.o ADC_eigenvectors.o CAP_MO.o CAP.o dmat.o dmat_triplet.o CAP_doubly.o CAP_doubly_triplet.o cap_main.o
+
+ANALYSIS_OBJS = adc_analyzer.o full_cap_analyzer.o adc2_dip_analyzer.o isr_dipole_analyzer.o subspacecap_analyzer.o
+
+
+export LANCZOS_OBJS ADC2_PROP_OBJS ADC2_OBJS NDADC3_IP_OBJS NDADC3_PROP_OBJS ADC2_POL_OBJS SCFDATA_OBJS SUBSPACECAP_OBJS ANALYSIS_OBJS
+ 
+
+SUBDIR_OBJS = $(ADC2_POL_OBJS) $(ADC2_PROP_OBJS)  $(ADC2_OBJS) $(LANCZOS_OBJS) $(NDADC3_IP_OBJS) $(NDADC3_PROP_OBJS) $(SCFDATA_OBJS) $(SUBSPACECAP_OBJS) $(ANALYSIS_OBJS)
+OBJS = $(SUBDIR_OBJS) $(ROOTDIR_OBJS)
+
+
+all: $(BIN)
+
+$(BIN): $(OBJS)
+	$(CPP) $(CPPFLAGS) $(OPENMP) -o $(BIN) $(LDFLAGS) `ls -f $(LS_OBJS)` $(LIB_DIR) $(LIB) 
+
+$(SUBDIR_OBJS): $(SUBDIRS)
+
+.SECONDEXPANSION:
+$(ROOTDIR_OBJS): $$(patsubst %.o,%.cpp,$$@)
+	$(CPP) $(CPPFLAGS) $(INC_DIR) -c $< -o $@
+
+.PHONY : clean $(SUBDIRS) all
+
+$(SUBDIRS):
+	$(MAKE) -C $@ $(MAKECMDGOALS)
+
+clean: $(SUBDIRS)
+	-rm -f *.mod *.o *~ $(BIN)
+
+

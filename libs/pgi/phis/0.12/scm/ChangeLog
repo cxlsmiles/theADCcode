@@ -1,0 +1,17 @@
+2003-11-24  Alexander Thiel  <stderr@web.de>
+
+	* phis.scm: New file. This contains the declaration of the PHIS wrappers
+	as a guile module.
+	* phis-scm.c: Turned this into a module.
+	* Makefile: Compile phis-scm.c into a dynamic library.
+
+2003-06-30  Alexander Thiel  <stderr@web.de>
+
+	* phis-scm.c: Switched to GH inteface. Many more functions added.
+
+2003-06-01  Alexander Thiel  <stderr@web.de>
+
+	* phis-scm.c, Makefile: New files. Basic functionality
+	is in place.
+
+

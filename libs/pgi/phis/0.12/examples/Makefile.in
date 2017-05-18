@@ -1,0 +1,39 @@
+CC     = @CC@
+CFLAGS = -I../include @CFLAGS@ 
+
+FC     = @F77@
+FFLAGS = @FFLAGS@
+
+LDFLAGS = @LDFLAGS@
+LIBS    = @LIBS@
+FLIBS   = @FLIBS@
+
+cleanfiles     = *.o *~ $(all)
+realcleanfiles = Makefile sample fsample dump_all fdump_all int_check fint_check
+distcleanfiles =
+
+.PHONY: test
+
+all: sample fsample dump_all fdump_all int_check fint_check
+
+dump_all: dump_all.o ../lib/libphis.a
+	$(CC) $(LDFLAGS) $< $(LIBS) $(FLIBS) -o $@
+
+int_check: int_check.o ../lib/libphis.a
+	$(CC) $(LDFLAGS) $< $(LIBS) $(FLIBS) -o $@
+
+fint_check: fint_check.o ../lib/libphis.a
+	$(FC) $(LDFLAGS) $< $(LIBS) $(FLIBS) -o $@
+
+fdump_all: fdump_all.o ../lib/libphis.a
+	$(FC) $(LDFLAGS) $< $(LIBS) $(FLIBS) -o $@
+
+sample: sample.o ../lib/libphis.a
+	$(CC) $(LDFLAGS) $< $(LIBS) $(FLIBS) -o $@
+
+fsample: fsample.o ../lib/libphis.a
+	$(FC) $(LDFLAGS) $< $(LIBS) $(FLIBS) -o $@
+
+test:
+
+include ../include/cleanup.mk

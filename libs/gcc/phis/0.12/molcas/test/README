@@ -1,0 +1,17 @@
+expected values: calculated with molcas
+
+H20/MP2, 6-31G*, cartesian d functions, all orbitals active 
+       Second-order correlation energy      =       -0.1879625707 A.U.
+mp2 correlation energy         -0.18796257
+
+H20/MP2, 6-31G*, spherical d functions, all orbitals active 
+       Second-order correlation energy      =       -0.1856695536 A.U.
+mp2 correlation energy
+
+H20/MP2, 6-31G*, cartesian d functions, orbitals 2 to 18 active: 
+       Second-order correlation energy      =       -0.1758996984 A.U.
+mp2 correlation energy         -0.16721332
+
+H20/MP2, 6-31G*, spherical d functions, orbitals 2 to 18 active: 
+       Second-order correlation energy      =       -0.1840491744 A.U.
+mp2 correlation energy         -0.17536075

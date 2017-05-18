@@ -1,0 +1,36 @@
+!    Li
+!
+!    ---
+!    RHF
+!    ---
+!
+ $CONTRL SCFTYP=RHF ICHARG=-1 ISPHER=1 QMTTOL=1.0E-5 $END
+ $GUESS  GUESS=HUCKEL                        $END
+ $SCF    NCONV=9                       $END
+!
+!    -------
+!    General
+!    -------
+!
+ $CONTRL EXETYP=RUN MULT=1 RUNTYP=ENERGY CCTYP=CCSD     $END
+ $CCINP NCORE=0 NFZV=0 MAXCC=1 $END
+ $CONTRL UNITS=ANGS MAXIT=100 NPRINT=4       $END
+ $INTGRL NINTMX=50000 NDAR=100000            $END
+ $SYSTEM TIMLIM=9999 MEMORY=2000000          $END
+ $CONTRL INTTYP=HONDO ICUT=40 ITOL=40        $END
+
+ $DATA
+Li aug-cc-TVZ
+CN 1 
+
+LITHIUM 3.0 0.0 0.0 0.0
+S   3
+  1     16.1195750              0.15432897       
+  2      2.9362007              0.53532814       
+  3      0.7946505              0.44463454       
+L   3
+  1      0.6362897             -0.09996723             0.15591627       
+  2      0.1478601              0.39951283             0.60768372       
+  3      0.0480887              0.70011547             0.39195739 
+
+  $END
